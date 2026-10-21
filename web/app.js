@@ -24,12 +24,12 @@ form.addEventListener('submit', async event => {
     const response = await fetch('generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Ошибка генерации');
-    const names = { zip: 'wulff-set.zip', students: 'students.pdf', teacher: 'teacher.pdf', csv: 'answers.csv', json: 'settings.json' };
+    const names = { zip: 'wulff-set.zip', students: 'students.pdf', teacher: 'teacher.pdf', csv: 'answers.csv', json: 'settings.json', guide: 'student_guide.pdf' };
     for (const [id, name] of Object.entries(names)) {
       const a = document.getElementById(id); a.href = `download/${result.job}/${name}`; a.download = name;
     }
     document.getElementById('view').href = `download/${result.job}/students.pdf?inline=1`;
-    document.getElementById('result-meta').textContent = `${result.count} вариантов · ${result.pages} стр. в каждом PDF · код набора: ${result.seed}`;
+    document.getElementById('result-meta').textContent = `${result.count} вариантов · ${result.pages} стр. заданий и ${result.pages} стр. ответов · код набора: ${result.seed}`;
     document.getElementById('initial-preview').hidden = true;
     document.getElementById('result').hidden = false;
     statusEl.textContent = `Готово. Код набора: ${result.seed}. Файлы доступны справа.`;

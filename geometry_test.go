@@ -93,7 +93,9 @@ func TestGeneratedGeometry(t *testing.T) {
 						}
 					}
 					near(t, v.RakePlane.Pole().Dot(v.RakeLine.Vec()), 0, 1e-9)
-					near(t, v.RakePlane.RakeOf(v.RakeLine), v.Rake, 1e-9)
+					rake, from := v.RakePlane.ReadRake(v.RakeLine)
+					near(t, rake, v.Rake, 1e-9)
+					near(t, math.Cos(rad(from-v.RakeFrom)), 1, 1e-9)
 					h := v.Fold.Hinge.Vec()
 					near(t, h.Dot(v.Wing1.Pole()), 0, 1e-9)
 					near(t, h.Dot(v.Wing2.Pole()), 0, 1e-9)
@@ -135,7 +137,7 @@ func TestSeedRepeatabilityAndUniqueness(t *testing.T) {
 						t.Fatal("duplicate line")
 					}
 				case "rake":
-					if v.RakePlane == w.RakePlane && v.Rake == w.Rake {
+					if v.RakePlane == w.RakePlane && v.Rake == w.Rake && v.RakeFrom == w.RakeFrom {
 						t.Fatal("duplicate rake")
 					}
 				case "fold":
@@ -172,7 +174,7 @@ func TestInverseUsesDistinctElements(t *testing.T) {
 			}
 			planes[e.Plane] = true
 			lines[e.Line] = true
-			rk := fmt.Sprint(e.RakePlane, e.Rake)
+			rk := fmt.Sprint(e.RakePlane, e.Rake, e.RakeFrom)
 			fk := fmt.Sprint(e.Wing1, e.Wing2)
 			if rakes[rk] || folds[fk] {
 				t.Fatal("repeated forward/inverse task")
@@ -185,5 +187,44 @@ func TestInverseUsesDistinctElements(t *testing.T) {
 	c.Mode = "inverse"
 	if !reflect.DeepEqual(vs, generate(c)) {
 		t.Fatal("data depends on mode")
+	}
+}
+
+func TestLectureRakeAndBothStrikeEnds(t *testing.T) {
+	// Lecture PDF pp. 82–88: plane 38/40, rake 25 from NW strike end.
+	p := Plane{38, 40}
+	l := p.RakeLineFrom(25, 308)
+	near(t, l.Trend, 327.6573572635522, 1e-9)
+	near(t, l.Plunge, 15.76270025699485, 1e-9)
+	for _, p := range []Plane{{0, 30}, {38, 40}, {90, 60}, {265, 15}, {350, 75}} {
+		for _, r := range []float64{15, 25, 75} {
+			for _, side := range []float64{-90, 90} {
+				from := azimuth(p.Az + side)
+				l := p.RakeLineFrom(r, from)
+				got, gotFrom := p.ReadRake(l)
+				near(t, p.Pole().Dot(l.Vec()), 0, 1e-9)
+				near(t, got, r, 1e-9)
+				near(t, math.Cos(rad(gotFrom-from)), 1, 1e-9)
+			}
+		}
+	}
+}
+func TestLecturePiPlaneConstruction(t *testing.T) {
+	// The manual reading on pp. 102–107 is approximately 314/17.
+	// Exact intersection of the stated wing planes is 313.9/18.1.
+	p, q := Plane{241, 48}, Plane{28, 50}
+	f := solveFold(p, q)
+	near(t, f.Hinge.Trend, 313.90189410121377, 1e-9)
+	near(t, f.Hinge.Plunge, 18.083401929907456, 1e-9)
+	sameAxis(t, f.SectionPlane.Pole(), f.Hinge.Vec())
+	near(t, f.Section1.Vec().Dot(p.Pole()), 0, 1e-9)
+	near(t, f.Section2.Vec().Dot(q.Pole()), 0, 1e-9)
+	for _, l := range []Line{f.Section1, f.Section2} {
+		near(t, l.Vec().Dot(f.SectionPlane.Pole()), 0, 1e-9)
+	}
+	angle := deg(math.Acos(clamp(math.Abs(f.Section1.Vec().Dot(f.Section2.Vec())))))
+	near(t, angle, f.Acute, 1e-9)
+	for _, b := range []Plane{f.Bisector1, f.Bisector2} {
+		near(t, b.Pole().Dot(f.Hinge.Vec()), 0, 1e-9)
 	}
 }

@@ -24,6 +24,7 @@ type Elements struct {
 	Line      Line       `json:"line"`
 	RakePlane Plane      `json:"rake_plane"`
 	Rake      float64    `json:"rake"`
+	RakeFrom  float64    `json:"rake_from_azimuth"`
 	RakeLine  Line       `json:"rake_line"`
 	Wing1     Plane      `json:"wing_1"`
 	Wing2     Plane      `json:"wing_2"`
@@ -88,7 +89,7 @@ func (c *Config) Validate() error {
 }
 func generate(c Config) []Variant {
 	rng := func(domain string) *mathrand.Rand {
-		h := sha256.Sum256([]byte("wulff-v2/" + domain + "/" + c.Seed))
+		h := sha256.Sum256([]byte("wulff-v3/" + domain + "/" + c.Seed))
 		return mathrand.New(mathrand.NewSource(int64(binary.LittleEndian.Uint64(h[:8]))))
 	}
 	forward, inverse := rng("forward"), rng("inverse")
@@ -109,7 +110,8 @@ func generateElements(c Config, r *mathrand.Rand, used map[string]bool) Elements
 	plane := func() Plane { return Plane{angle(0, 360-c.Step), angle(15, 75)} }
 	for {
 		v := Elements{Plane: plane(), Line: Line{angle(0, 360-c.Step), angle(10, 70)}, RakePlane: plane(), Rake: angle(15, 75)}
-		v.RakeLine = v.RakePlane.RakeLine(v.Rake)
+		v.RakeFrom = azimuth(v.RakePlane.Az - 90 + float64(r.Intn(2))*180)
+		v.RakeLine = v.RakePlane.RakeLineFrom(v.Rake, v.RakeFrom)
 		for {
 			v.Wing1, v.Wing2 = plane(), plane()
 			n1, n2 := v.Wing1.Pole(), v.Wing2.Pole()
@@ -131,7 +133,7 @@ func generateElements(c Config, r *mathrand.Rand, used map[string]bool) Elements
 			case "line":
 				k = fmt.Sprint(v.Line)
 			case "rake":
-				k = fmt.Sprint(v.RakePlane, v.Rake)
+				k = fmt.Sprint(v.RakePlane, v.Rake, v.RakeFrom)
 			case "fold":
 				k = fmt.Sprint(v.Wing1, v.Wing2)
 			}

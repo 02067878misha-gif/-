@@ -110,6 +110,10 @@ func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int) {
 	switch style {
 	case 1:
 		p.SetDashPattern([]float64{2, 1}, 0)
+	case 5:
+		p.SetDashPattern([]float64{.5, .8}, 0)
+		p.SetDrawColor(90, 90, 90)
+		p.SetLineWidth(.45)
 	case 3:
 		p.SetDashPattern([]float64{4, 1.5}, 0)
 	case 4:
@@ -167,33 +171,45 @@ func elementLabel(task string) string {
 	case "line":
 		return "L · линейность"
 	case "rake":
-		return "R, Lr · rake"
+		return "Склонение (rake)"
 	default:
 		return "K1, K2 · складка"
 	}
+}
+func directionName(a float64) string {
+	a = azimuth(a)
+	for i, n := range []string{"С", "В", "Ю", "З"} {
+		if math.Abs(a-float64(i*90)) < 1e-8 {
+			return n
+		}
+	}
+	return []string{"СВ", "ЮВ", "ЮЗ", "СЗ"}[int(a/90)]
+}
+func rakeStart(v Elements) string {
+	return fmt.Sprintf("%s (аз. %.0f°)", directionName(v.RakeFrom), v.RakeFrom)
 }
 func prompt(task, mode string, v Elements) string {
 	if mode == "forward" {
 		switch task {
 		case "plane":
-			return "P: " + planeText(v.Plane) + ". Постройте дугу и полюс Np."
+			return "P: " + planeText(v.Plane) + ". Постройте дугу большого круга P и полюс Np (перпендикуляр к P). Лекция: с. 69–74, 110."
 		case "line":
-			return fmt.Sprintf("L: азимут погружения %.0f°; угол погружения %.0f°. Нанесите точку L.", v.Line.Trend, v.Line.Plunge)
+			return fmt.Sprintf("L: азимут погружения %.0f°; угол погружения %.0f°. Отложите угол от внешнего круга и отметьте линейность точкой L. Лекция: с. 75–79.", v.Line.Trend, v.Line.Plunge)
 		case "rake":
-			return fmt.Sprintf("R (плоскость): %s; rake %.0f° (угол между Lr и линией простирания R). Постройте R и Lr (линию в R); найдите погружение Lr. Отсчёт rake — от (аз. пад. R − 90°) к падению.", planeText(v.RakePlane), v.Rake)
+			return fmt.Sprintf("R (плоскость): %s. Lr (линейность в R): склонение (rake — угол к простиранию) %.0f° от %s конца. Отложите угол по дуге R; найдите азимут и угол погружения Lr. Лекция: с. 81–88.", planeText(v.RakePlane), v.Rake, rakeStart(v))
 		default:
-			return "K1: " + planeText(v.Wing1) + "; K2: " + planeText(v.Wing2) + ". Постройте крылья, шарнир H и биссектрисы A, B; определите углы."
+			return "Крылья: K1 " + pairPlane(v.Wing1) + "; K2 " + pairPlane(v.Wing2) + " (аз. пад./угол). Пересечение дуг — шарнир H. Найдите его азимут и угол погружения; через π-плоскость — углы и осевые поверхности. Лекция: с. 89–107, 116–117."
 		}
 	}
 	switch task {
 	case "plane":
-		return "По дуге P определите азимут и угол падения плоскости. Постройте её полюс Np."
+		return "По дуге большого круга P определите азимут и угол падения плоскости. Постройте полюс Np (перпендикуляр к P). Лекция: с. 69–74, 110."
 	case "line":
-		return "По точке L определите азимут и угол погружения линейного элемента."
+		return "По точке L определите азимут и угол погружения линейности: угол считайте от внешнего круга, как в лекции (с. 75–79)."
 	case "rake":
-		return "По дуге R (плоскости) и точке Lr (линии в R) найдите залегание R, погружение Lr и rake (угол между Lr и линией простирания R). Отсчёт rake — от (аз. пад. R − 90°) к падению."
+		return "По дуге R (плоскости) и точке Lr (линейности в R) найдите их ориентировку и склонение (rake — угол к простиранию). Укажите конец отсчёта: направление и азимут. Лекция: с. 81–88."
 	default:
-		return "По K1 и K2 найдите падение крыльев, шарнир H, оба двугранных угла и биссекторные плоскости A, B."
+		return "Определите падение K1, K2. Их пересечение — шарнир H: найдите азимут и угол погружения. Постройте π-плоскость (перпендикулярно H); найдите оба угла и осевые поверхности. Лекция: с. 99–107, 116–117."
 	}
 }
 func pairPlane(p Plane) string { return fmt.Sprintf("%.1f°/%.1f°", p.Az, p.Dip) }
@@ -205,9 +221,9 @@ func answers(task string, v Elements) string {
 	case "line":
 		return "L: " + pairLine(v.Line)
 	case "rake":
-		return fmt.Sprintf("R: %s; Lr: %s; rake %.0f°", pairPlane(v.RakePlane), pairLine(v.RakeLine), v.Rake)
+		return fmt.Sprintf("R: %s; Lr: %s; склонение (rake) %.0f° от %s", pairPlane(v.RakePlane), pairLine(v.RakeLine), v.Rake, rakeStart(v))
 	default:
-		return fmt.Sprintf("K1: %s; K2: %s; H: %s; углы %.1f° и %.1f°.\nБиссектрисы: A %s; B %s.", pairPlane(v.Wing1), pairPlane(v.Wing2), pairLine(v.Fold.Hinge), v.Fold.Acute, v.Fold.Supplement, pairPlane(v.Fold.Bisector1), pairPlane(v.Fold.Bisector2))
+		return fmt.Sprintf("K1: %s; K2: %s; H (аз./погр.): %s.\nπ-плоскость: %s; углы %.1f° и %.1f°.\nОсевые поверхности (два варианта): ОП1 %s; ОП2 %s.", pairPlane(v.Wing1), pairPlane(v.Wing2), pairLine(v.Fold.Hinge), pairPlane(v.Fold.SectionPlane), v.Fold.Acute, v.Fold.Supplement, pairPlane(v.Fold.Bisector1), pairPlane(v.Fold.Bisector2))
 	}
 }
 func blankAnswer(task string) string {
@@ -217,9 +233,9 @@ func blankAnswer(task string) string {
 	case "line":
 		return "L: _____/_____"
 	case "rake":
-		return "R: _____/_____; Lr: _____/_____; rake: _____"
+		return "R: _____/_____; Lr: _____/_____; склонение (rake): _____ от конца простирания _____ (аз. _____)"
 	default:
-		return "K1: _____/_____; K2: _____/_____; H: _____/_____; углы: _____ и _____.\nБиссектрисы: A _____/_____; B _____/_____."
+		return "K1: _____/_____; K2: _____/_____; H (аз./погр.): _____/_____.\nπ-плоскость: _____/_____; углы: _____ и _____.\nОсевые поверхности (два варианта): ОП1 _____/_____; ОП2 _____/_____."
 	}
 }
 func drawElements(p *gofpdf.Fpdf, c Config, v Elements, cx, cy, r float64, teacher bool) {
@@ -234,6 +250,7 @@ func drawElements(p *gofpdf.Fpdf, c Config, v Elements, cx, cy, r float64, teach
 			curve(p, v.Wing1, cx, cy, r, 3)
 			curve(p, v.Wing2, cx, cy, r, 4)
 			if teacher {
+				curve(p, v.Fold.SectionPlane, cx, cy, r, 5)
 				curve(p, v.Fold.Bisector1, cx, cy, r, 2)
 				curve(p, v.Fold.Bisector2, cx, cy, r, 2)
 			}
@@ -255,8 +272,11 @@ func drawElements(p *gofpdf.Fpdf, c Config, v Elements, cx, cy, r float64, teach
 			curveLabel(p, v.Wing1, cx, cy, r, "K1")
 			curveLabel(p, v.Wing2, cx, cy, r, "K2")
 			if teacher {
-				curveLabel(p, v.Fold.Bisector1, cx, cy, r, "A")
-				curveLabel(p, v.Fold.Bisector2, cx, cy, r, "B")
+				curveLabel(p, v.Fold.SectionPlane, cx, cy, r, "π")
+				curveLabel(p, v.Fold.Bisector1, cx, cy, r, "ОП1")
+				curveLabel(p, v.Fold.Bisector2, cx, cy, r, "ОП2")
+				marker(p, v.Fold.Section1, cx, cy, r, "A", 0)
+				marker(p, v.Fold.Section2, cx, cy, r, "B", 0)
 				marker(p, v.Fold.Hinge, cx, cy, r, "H", 2)
 			}
 		}
@@ -300,9 +320,9 @@ func makePDF(c Config, variants []Variant, teacher bool) ([]byte, error) {
 			} else {
 				textAt(p, 12, 24, "ФИО: __________________________________  Группа: __________  Дата: __________", 8)
 			}
-			instruction := "Все перечисленные элементы нанесите СОВМЕСТНО на одну сетку."
+			instruction := "Сетка Вульфа, нижняя полусфера. Все элементы — на одной кальке; после построений верните север к 0°."
 			if mode == "inverse" {
-				instruction = "На сетке нанесён отдельный случайный набор. Определите параметры всех обозначенных элементов."
+				instruction = "На сетке — новый набор элементов. Определите их параметры; выполните вспомогательные построения на кальке."
 			}
 			textAt(p, 12, 30, instruction, 7.5)
 			p.SetDrawColor(160, 170, 160)
@@ -369,6 +389,8 @@ students.pdf — только задания, без численных отве
 teacher.pdf — задания, построения и ответы; студентам не выдавать.
 answers.csv — краткие ответы, UTF-8 с BOM, разделитель «;» для Excel.
 settings.json — параметры набора и полные расчётные ответы.
+student_guide.pdf — общая памятка по построениям из вашей лекции (2 страницы).
+Памятка отдельная: к двум листам каждого варианта её добавлять не нужно.
 
 Печать: A4, «Фактический размер» / 100%, без подгонки страницы.
 Диаметр каждой сетки — 180 мм. Проверьте линейкой после печати.
@@ -385,29 +407,36 @@ settings.json — параметры набора и полные расчётн
 Обозначения общей сетки: P — плоскость, Np — её полюс; L — линия;
 R — плоскость для rake, Lr — линия в ней; K1, K2 — крылья складки.
 P — сплошная, R — штриховая, K1 — длинные штрихи, K2 — штрихпунктир.
-В ответах дополнительно H — шарнир, A и B — биссекторные плоскости.
-Rake отсчитывается в плоскости от направления простирания
-(азимут падения − 90°) к направлению падения; диапазон 0–90°.
+H — шарнир; π — плоскость, перпендикулярная шарниру;
+A, B — пересечения π-плоскости с крыльями, как в лекции;
+ОП1, ОП2 — два возможных положения осевой поверхности.
+Склонение (rake) отсчитывается вдоль дуги большого круга
+от УКАЗАННОГО конца простирания (например, СЗ с точным азимутом), 0–90°.
+В обратной задаче укажите и угол, и конец отсчёта.
 Числа в ключе округлены до 0,1°; для ручного считывания ориентир ±2°.
 Азимуты 0° и 360° эквивалентны; для горизонтального шарнира
 противоположные направления эквивалентны.
 
 Складки: пересечение плоскостей даёт шарнир. Приведены острый
 двугранный угол и его дополнение до 180°, а также обе биссекторные
-плоскости A и B. По двум неориентированным крыльям нельзя однозначно
+плоскости ОП1 и ОП2. По двум неориентированным крыльям нельзя однозначно
 выбрать геологический угол складки и осевую поверхность; нужны сведения
 о полярности/внутренней области. В заданиях требуется найти обе пары.
 Это геометрическая модель симметричной складки, а не восстановление
 произвольной природной осевой поверхности.
 
 Повторение набора: введите тот же код набора, шаг, типы заданий,
-режим и количество в той же версии программы (алгоритм wulff-v2).
+режим и количество в той же версии программы (алгоритм wulff-v3).
 Увеличение количества сохраняет первые варианты при прочих равных.
 Программа не требует интернета и не отправляет данные на серверы.
 `
 
 func buildFiles(c Config) (map[string][]byte, error) {
 	vs := generate(c)
+	guide, err := makeGuidePDF()
+	if err != nil {
+		return nil, err
+	}
 	student, err := makePDF(c, vs, false)
 	if err != nil {
 		return nil, err
@@ -420,12 +449,12 @@ func buildFiles(c Config) (map[string][]byte, error) {
 		Algorithm string    `json:"algorithm"`
 		Config    Config    `json:"config"`
 		Variants  []Variant `json:"variants"`
-	}{"wulff-v2", c, vs}
+	}{"wulff-v3", c, vs}
 	j, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		return nil, err
 	}
-	return map[string][]byte{"students.pdf": student, "teacher.pdf": teacher, "answers.csv": makeCSV(c, vs), "settings.json": j, "PRINT_README.txt": []byte(printReadme)}, nil
+	return map[string][]byte{"students.pdf": student, "teacher.pdf": teacher, "answers.csv": makeCSV(c, vs), "settings.json": j, "PRINT_README.txt": []byte(printReadme), "student_guide.pdf": guide}, nil
 }
 func zipFiles(files map[string][]byte) ([]byte, error) {
 	var b bytes.Buffer

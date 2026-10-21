@@ -47,11 +47,11 @@ func TestGenerateAndDownload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(zr.File) != 5 {
+	if len(zr.File) != 6 {
 		t.Fatal("missing output files")
 	}
 	for _, f := range zr.File {
-		if f.Name == "students.pdf" || f.Name == "teacher.pdf" {
+		if f.Name == "students.pdf" || f.Name == "teacher.pdf" || f.Name == "student_guide.pdf" {
 			r, _ := f.Open()
 			data, _ := io.ReadAll(r)
 			r.Close()
@@ -71,6 +71,9 @@ func TestGenerateAndDownload(t *testing.T) {
 	}
 	if get("/test-token/").Code != 200 {
 		t.Fatal("UI missing")
+	}
+	if get("/test-token/guide").Code != 200 {
+		t.Fatal("lecture guide missing")
 	}
 	if get("/test-token/assets/wulff.png").Code != 200 {
 		t.Fatal("grid missing")

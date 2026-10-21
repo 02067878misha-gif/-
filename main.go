@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "1.1.1"
+const version = "1.2.0"
 
 type app struct {
 	mu       sync.RWMutex
@@ -136,6 +136,23 @@ func (a *app) handler(base string) http.Handler {
 				w.Header().Set("Content-Disposition", `attachment; filename="`+parts[1]+`"`)
 			}
 			http.ServeContent(w, r, parts[1], time.Time{}, bytes.NewReader(data))
+		case path == "guide":
+			if r.Method != "GET" && r.Method != "HEAD" {
+				fail(w, "Требуется GET", 405)
+				return
+			}
+			data, err := makeGuidePDF()
+			if err != nil {
+				fail(w, "Не удалось создать памятку", 500)
+				return
+			}
+			w.Header().Set("Content-Type", "application/pdf")
+			if r.URL.Query().Get("inline") == "1" {
+				w.Header().Set("Content-Disposition", "inline")
+			} else {
+				w.Header().Set("Content-Disposition", `attachment; filename="student_guide.pdf"`)
+			}
+			http.ServeContent(w, r, "student_guide.pdf", time.Time{}, bytes.NewReader(data))
 		case path == "ping":
 			w.WriteHeader(204)
 		case path == "quit":
@@ -223,7 +240,7 @@ func main() {
 				log.Fatal(err)
 			}
 		}
-		fmt.Printf("Готово: %d вариантов, %d страниц в каждом PDF. Код: %s. Папка: %s\n", c.Count, c.Count*pagesPerVariant(c), c.Seed, *out)
+		fmt.Printf("Готово: %d вариантов, %d страниц заданий и столько же ответов. Код: %s. Папка: %s\n", c.Count, c.Count*pagesPerVariant(c), c.Seed, *out)
 		return
 	}
 	l, err := net.Listen("tcp4", "127.0.0.1:0")

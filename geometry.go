@@ -52,7 +52,22 @@ func planeFromPole(v Vec) Plane {
 	return Plane{azimuth(l.Trend + 180), 90 - l.Plunge}
 }
 func (p Plane) RakeLine(r float64) Line {
-	return lineFromVec(p.Strike().Scale(math.Cos(rad(r))).Add(p.DipLine().Scale(math.Sin(rad(r)))))
+	return p.RakeLineFrom(r, azimuth(p.Az-90))
+}
+
+// The lecture specifies a strike end (e.g. "25° NW"), not a fixed sign rule.
+func (p Plane) RakeLineFrom(r, fromAz float64) Line {
+	strike := Line{fromAz, 0}.Vec()
+	return lineFromVec(strike.Scale(math.Cos(rad(r))).Add(p.DipLine().Scale(math.Sin(rad(r)))))
+}
+func (p Plane) ReadRake(l Line) (r, fromAz float64) {
+	v := l.Vec()
+	s := v.Dot(p.Strike())
+	fromAz = azimuth(p.Az - 90)
+	if s < 0 {
+		fromAz = azimuth(fromAz + 180)
+	}
+	return deg(math.Atan2(v.Dot(p.DipLine()), math.Abs(s))), fromAz
 }
 func (p Plane) RakeOf(l Line) float64 {
 	v := l.Vec()
@@ -79,15 +94,21 @@ func greatCircle(p Plane) []XY {
 }
 
 type FoldAnswer struct {
-	Hinge      Line    `json:"hinge"`
-	Acute      float64 `json:"acute_dihedral"`
-	Supplement float64 `json:"supplementary_dihedral"`
-	Bisector1  Plane   `json:"bisector_1"`
-	Bisector2  Plane   `json:"bisector_2"`
+	Hinge        Line    `json:"hinge"`
+	Acute        float64 `json:"acute_dihedral"`
+	Supplement   float64 `json:"supplementary_dihedral"`
+	Bisector1    Plane   `json:"bisector_1"`
+	Bisector2    Plane   `json:"bisector_2"`
+	SectionPlane Plane   `json:"pi_plane"`
+	Section1     Line    `json:"section_a"`
+	Section2     Line    `json:"section_b"`
 }
 
 func solveFold(p, q Plane) FoldAnswer {
 	a, b := p.Pole(), q.Pole()
 	angle := deg(math.Acos(clamp(math.Abs(a.Dot(b)))))
-	return FoldAnswer{lineFromVec(a.Cross(b)), angle, 180 - angle, planeFromPole(a.Add(b)), planeFromPole(a.Add(b.Scale(-1)))}
+	h := a.Cross(b).Unit().Lower()
+	return FoldAnswer{Hinge: lineFromVec(h), Acute: angle, Supplement: 180 - angle,
+		Bisector1: planeFromPole(a.Add(b)), Bisector2: planeFromPole(a.Add(b.Scale(-1))),
+		SectionPlane: planeFromPole(h), Section1: lineFromVec(a.Cross(h)), Section2: lineFromVec(b.Cross(h))}
 }
