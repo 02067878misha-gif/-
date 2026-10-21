@@ -180,7 +180,7 @@ func prompt(task, mode string, v Elements) string {
 		case "line":
 			return fmt.Sprintf("L: азимут погружения %.0f°; угол погружения %.0f°. Нанесите точку L.", v.Line.Trend, v.Line.Plunge)
 		case "rake":
-			return fmt.Sprintf("R: %s; rake %.0f°. Постройте R и Lr; найдите погружение Lr. Rake — от (аз. пад. R − 90°) к падению.", planeText(v.RakePlane), v.Rake)
+			return fmt.Sprintf("R (плоскость): %s; rake %.0f° (угол между Lr и линией простирания R). Постройте R и Lr (линию в R); найдите погружение Lr. Отсчёт rake — от (аз. пад. R − 90°) к падению.", planeText(v.RakePlane), v.Rake)
 		default:
 			return "K1: " + planeText(v.Wing1) + "; K2: " + planeText(v.Wing2) + ". Постройте крылья, шарнир H и биссектрисы A, B; определите углы."
 		}
@@ -191,7 +191,7 @@ func prompt(task, mode string, v Elements) string {
 	case "line":
 		return "По точке L определите азимут и угол погружения линейного элемента."
 	case "rake":
-		return "По дуге R и точке Lr найдите залегание R, погружение Lr и rake. Rake — от (аз. пад. R − 90°) к падению."
+		return "По дуге R (плоскости) и точке Lr (линии в R) найдите залегание R, погружение Lr и rake (угол между Lr и линией простирания R). Отсчёт rake — от (аз. пад. R − 90°) к падению."
 	default:
 		return "По K1 и K2 найдите падение крыльев, шарнир H, оба двугранных угла и биссекторные плоскости A, B."
 	}
