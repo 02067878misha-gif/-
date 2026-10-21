@@ -17,7 +17,17 @@ jobs:
       - name: Test native controls and generate a complete set
         env:
           WULFF_GUI_SCREENSHOTS: '${{ github.workspace }}\dist\native-screenshots'
-        run: go test -v -timeout 120s ./...
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          go test -v -timeout 120s ./... 2>&1 | Tee-Object -FilePath dist/native-test.log
+          $testCode = $LASTEXITCODE
+          if ($testCode -ne 0) {
+            $details = (Get-Content dist/native-test.log -Tail 90) -join "`n"
+            $details = $details.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Output "::error title=Windows test details::$details"
+            exit $testCode
+          }
       - name: Vet Windows code
         run: go vet ./...
       - name: Build standalone Windows program
@@ -30,3 +40,4 @@ jobs:
           path: |
             dist/native-screenshots/*.png
             dist/WulffGenerator.exe
+            dist/native-test.log
