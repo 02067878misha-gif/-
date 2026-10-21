@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Сетка Вульфа — генератор заданий</title><link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="header"><a class="brand" href="./"><span class="brand-icon">⊕</span> Сетка Вульфа <span class="version">1.0</span></a><div class="header-right"><span class="offline"><i></i> Работает без интернета</span><button class="quiet" id="quit" type="button">Закрыть программу</button></div></header>
+  <main>
+    <section class="intro"><div class="eyebrow">ПРАКТИКУМ ПО СТРУКТУРНОЙ ГЕОЛОГИИ</div><h1>Разные варианты.<br>Точные построения.</h1><p>Задайте состав работы. Программа подберёт углы, построит обратные задачи<br class="wide"> и подготовит отдельный ключ для преподавателя.</p></section>
+    <div class="workspace">
+      <form id="settings" class="card settings">
+        <div class="section-label"><span>01</span> Настройки набора</div>
+        <label for="title">Название работы</label><input id="title" name="title" maxlength="70" value="Стереографические проекции">
+        <div class="fields"><div><label for="count">Вариантов</label><input id="count" name="count" type="number" min="1" max="20" value="20" required></div><div><label for="step">Шаг исходных углов</label><select id="step" name="step"><option value="5">5° · стандартный</option><option value="10">10° · крупный</option><option value="1">1° · точный</option></select></div></div>
+        <fieldset><legend>Типы заданий</legend>
+          <label class="check"><input type="checkbox" name="task" value="plane" checked><span><b>Плоскость</b><small>Дуга и полюс · азимут и угол падения</small></span><em>01</em></label>
+          <label class="check"><input type="checkbox" name="task" value="line" checked><span><b>Линейный элемент</b><small>Точка · азимут и угол погружения</small></span><em>02</em></label>
+          <label class="check"><input type="checkbox" name="task" value="rake" checked><span><b>Линейность в плоскости</b><small>Плоскость, rake и погружение линии</small></span><em>03</em></label>
+          <label class="check"><input type="checkbox" name="task" value="fold" checked><span><b>Крылья складки</b><small>Шарнир, углы и биссекторные плоскости</small></span><em>04</em></label>
+        </fieldset>
+        <label for="mode">Направление задачи</label><select id="mode" name="mode"><option value="both">Прямые + обратные</option><option value="forward">Прямые · по значениям построить</option><option value="inverse">Обратные · по построению определить</option></select>
+        <label for="seed">Код набора <span class="optional">необязательно</span></label><input id="seed" name="seed" maxlength="48" placeholder="Автоматически — новый при каждом запуске"><p class="hint">Одинаковые код и настройки воспроизводят те же задания.</p>
+        <div class="estimate" id="estimate"></div>
+        <button class="primary" id="generate" type="submit">Создать комплект PDF <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </form>
+      <div class="right-column">
+        <section class="card preview-card"><div class="preview-top"><div class="section-label"><span>02</span> Печатный комплект</div><span class="paper-tag">A4 / 100%</span></div>
+          <div id="initial-preview" class="sample"><div class="sample-heading"><span>УЧЕБНАЯ СЕТКА</span><span>Ø 100 мм в PDF</span></div><div class="net-image"><img src="assets/wulff.png" alt="Приложенная равноугольная сетка Вульфа"><span class="north">С / 0°</span><span class="east">В / 90°</span></div><div class="sample-footer">Нижняя полусфера <span>Равноугольная проекция</span></div></div>
+          <div id="result" hidden><div class="result-head"><h2>Комплект готов</h2><p id="result-meta"></p></div><div class="downloads"><a id="zip" class="primary download" href="#">Скачать весь комплект .zip <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v14m-6-6 6 6 6-6M4 21h16" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a><a id="students" href="#" class="file-link"><span>Задания студентам</span><b>PDF</b></a><a id="teacher" href="#" class="file-link"><span>Ответы и построения преподавателя</span><b>PDF</b></a><a id="csv" href="#" class="file-link"><span>Таблица ответов для Excel</span><b>CSV</b></a><a id="json" href="#" class="file-link"><span>Параметры и расчётные значения</span><b>JSON</b></a></div><a id="view" class="view-link" target="_blank" rel="noopener" href="#">Открыть задания для просмотра</a><p class="hint private">Файлы преподавателя и settings.json содержат ответы. Студентам выдавайте только students.pdf.</p></div>
+        </section>
+        <section class="notes"><div><span class="note-num">01</span><h3>Прямая задача</h3><p>Даны элементы залегания. Студент выполняет построения на пустой сетке.</p></div><div><span class="note-num">02</span><h3>Обратная задача</h3><p>Элементы уже нанесены. Студент определяет их параметры по сетке.</p></div></section>
+        <details class="method"><summary>Обозначения и правила построения</summary><p>Север сверху, азимуты по часовой стрелке. Плоскость задаётся азимутом падения. Rake — от простирания (азимут падения − 90°) к линии падения, от 0 до 90°.</p><p>Для складки приводятся оба двугранных угла и обе биссекторные плоскости. Выбор осевой поверхности требует сведений о полярности складки. Печать: A4, фактический размер 100%; диаметр сетки 100 мм. Ответы округлены до 0,1°, ориентир точности ручного считывания ±2°.</p></details>
+      </div>
+    </div>
+    <footer>СЕТКА ВУЛЬФА <span>Автономный генератор · исходная сетка из ваших материалов · v1.0.0</span></footer>
+  </main>
+</body>
+</html>

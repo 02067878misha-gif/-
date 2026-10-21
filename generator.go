@@ -1,0 +1,137 @@
+package main
+
+import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	mathrand "math/rand"
+	"strings"
+)
+
+type Config struct {
+	Count int      `json:"count"`
+	Seed  string   `json:"seed"`
+	Mode  string   `json:"mode"`
+	Step  int      `json:"step"`
+	Tasks []string `json:"tasks"`
+	Title string   `json:"title"`
+}
+type Variant struct {
+	Number    int        `json:"number"`
+	Plane     Plane      `json:"plane"`
+	Line      Line       `json:"line"`
+	RakePlane Plane      `json:"rake_plane"`
+	Rake      float64    `json:"rake"`
+	RakeLine  Line       `json:"rake_line"`
+	Wing1     Plane      `json:"wing_1"`
+	Wing2     Plane      `json:"wing_2"`
+	Fold      FoldAnswer `json:"fold_answer"`
+}
+
+func defaultConfig() Config {
+	return Config{Count: 20, Mode: "both", Step: 5, Tasks: []string{"plane", "line", "rake", "fold"}, Title: "Стереографические проекции"}
+}
+func (c *Config) Validate() error {
+	if c.Count < 1 || c.Count > 20 {
+		return errors.New("Количество вариантов: от 1 до 20")
+	}
+	if c.Mode != "both" && c.Mode != "forward" && c.Mode != "inverse" {
+		return errors.New("Неизвестный режим задач")
+	}
+	if c.Step != 1 && c.Step != 5 && c.Step != 10 {
+		return errors.New("Шаг углов: 1, 5 или 10 градусов")
+	}
+	if len(c.Tasks) == 0 || len(c.Tasks) > 4 {
+		return errors.New("Выберите хотя бы один тип задания")
+	}
+	seen := map[string]bool{}
+	for _, t := range c.Tasks {
+		if t != "plane" && t != "line" && t != "rake" && t != "fold" {
+			return errors.New("Неизвестный тип задания")
+		}
+		if seen[t] {
+			return errors.New("Повтор типа задания")
+		}
+		seen[t] = true
+	}
+	if len([]rune(c.Title)) > 70 || strings.ContainsAny(c.Title, "\r\n\t") {
+		return errors.New("Название: до 70 символов, без переносов строк")
+	}
+	if len([]rune(c.Seed)) > 48 || strings.ContainsAny(c.Seed, "\r\n\t") {
+		return errors.New("Код набора: до 48 символов, без переносов строк")
+	}
+	if c.Title == "" {
+		c.Title = "Стереографические проекции"
+	}
+	if c.Seed == "" {
+		var b [6]byte
+		if _, err := rand.Read(b[:]); err != nil {
+			return err
+		}
+		c.Seed = hex.EncodeToString(b[:])
+	}
+	return nil
+}
+func generate(c Config) []Variant {
+	h := sha256.Sum256([]byte("wulff-v1/" + c.Seed))
+	r := mathrand.New(mathrand.NewSource(int64(binary.LittleEndian.Uint64(h[:8]))))
+	angle := func(min, max int) float64 {
+		lo := (min + c.Step - 1) / c.Step
+		hi := max / c.Step
+		return float64((lo + r.Intn(hi-lo+1)) * c.Step)
+	}
+	plane := func() Plane { return Plane{angle(0, 360-c.Step), angle(15, 75)} }
+	out := make([]Variant, c.Count)
+	used := map[string]bool{}
+	for i := range out {
+		for {
+			v := Variant{Number: i + 1, Plane: plane(), Line: Line{angle(0, 360-c.Step), angle(10, 70)}, RakePlane: plane(), Rake: angle(15, 75)}
+			v.RakeLine = v.RakePlane.RakeLine(v.Rake)
+			for {
+				v.Wing1, v.Wing2 = plane(), plane()
+				n1, n2 := v.Wing1.Pole(), v.Wing2.Pole()
+				if n1.Cross(n2).Dot(n1.Cross(n2)) < 1e-8 {
+					continue
+				}
+				v.Fold = solveFold(v.Wing1, v.Wing2)
+				if v.Fold.Acute >= 25 && v.Fold.Acute <= 80 && v.Fold.Hinge.Plunge <= 65 {
+					break
+				}
+			}
+			// Ensure uniqueness even if only one task type is selected.
+			keys := []string{}
+			for _, task := range c.Tasks {
+				var k string
+				switch task {
+				case "plane":
+					k = fmt.Sprint(v.Plane)
+				case "line":
+					k = fmt.Sprint(v.Line)
+				case "rake":
+					k = fmt.Sprint(v.RakePlane, v.Rake)
+				case "fold":
+					k = fmt.Sprint(v.Wing1, v.Wing2)
+				}
+				keys = append(keys, task+k)
+			}
+			duplicate := false
+			for _, k := range keys {
+				if used[k] {
+					duplicate = true
+				}
+			}
+			if duplicate {
+				continue
+			}
+			for _, k := range keys {
+				used[k] = true
+			}
+			out[i] = v
+			break
+		}
+	}
+	return out
+}
