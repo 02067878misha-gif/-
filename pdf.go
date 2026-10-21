@@ -44,7 +44,7 @@ func modes(c Config) []string {
 	}
 	return []string{c.Mode}
 }
-func pagesPerVariant(c Config) int         { return ((len(c.Tasks) + 1) / 2) * len(modes(c)) }
+func pagesPerVariant(c Config) int         { return len(modes(c)) }
 func setFont(p *gofpdf.Fpdf, size float64) { p.SetFont("DV", "", size); p.SetTextColor(25, 30, 35) }
 func textAt(p *gofpdf.Fpdf, x, y float64, text string, size float64) {
 	setFont(p, size)
@@ -72,11 +72,11 @@ func grid(p *gofpdf.Fpdf, cx, cy, r float64) {
 			case 0:
 				label = "С / 0°"
 			case 90:
-				label = "В / 90°"
+				label = "90°"
 			case 180:
 				label = "Ю / 180°"
 			case 270:
-				label = "З / 270°"
+				label = "270°"
 			}
 			setFont(p, 6.5)
 			w := p.GetStringWidth(label)
@@ -110,6 +110,10 @@ func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int) {
 	switch style {
 	case 1:
 		p.SetDashPattern([]float64{2, 1}, 0)
+	case 3:
+		p.SetDashPattern([]float64{4, 1.5}, 0)
+	case 4:
+		p.SetDashPattern([]float64{4, 1, .6, 1}, 0)
 	case 2:
 		p.SetDashPattern([]float64{.45, 1.1}, 0)
 		p.SetLineWidth(.4)
@@ -129,6 +133,8 @@ func marker(p *gofpdf.Fpdf, l Line, cx, cy, r float64, label string, kind int) {
 	case 1:
 		p.Line(x-1.5, y, x+1.5, y)
 		p.Line(x, y-1.5, x, y+1.5)
+	case 3:
+		p.Rect(x-1.3, y-1.3, 2.6, 2.6, "DF")
 	case 2:
 		p.Polygon([]gofpdf.PointType{{X: x, Y: y - 1.7}, {X: x + 1.7, Y: y}, {X: x, Y: y + 1.7}, {X: x - 1.7, Y: y}}, "DF")
 	default:
@@ -152,100 +158,113 @@ func curveLabel(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, label string) {
 	p.Rect(x+1, y-4, w+1, 4, "F")
 	p.Text(x+1.5, y-1, label)
 }
-func prompt(task, mode string, v Variant) string {
+
+// Every selected element shares this single net, in both task directions.
+func elementLabel(task string) string {
+	switch task {
+	case "plane":
+		return "P · плоскость"
+	case "line":
+		return "L · линейность"
+	case "rake":
+		return "R, Lr · rake"
+	default:
+		return "K1, K2 · складка"
+	}
+}
+func prompt(task, mode string, v Elements) string {
 	if mode == "forward" {
 		switch task {
 		case "plane":
-			return "Постройте дугу плоскости и её полюс: " + planeText(v.Plane) + "."
+			return "P: " + planeText(v.Plane) + ". Постройте дугу и полюс Np."
 		case "line":
-			return fmt.Sprintf("Нанесите линейный элемент L: азимут погружения %.0f°; угол погружения %.0f°.", v.Line.Trend, v.Line.Plunge)
+			return fmt.Sprintf("L: азимут погружения %.0f°; угол погружения %.0f°. Нанесите точку L.", v.Line.Trend, v.Line.Plunge)
 		case "rake":
-			return fmt.Sprintf("Плоскость: %s. Нанесите L при rake %.0f°; определите азимут и угол погружения L.", planeText(v.RakePlane), v.Rake)
+			return fmt.Sprintf("R: %s; rake %.0f°. Постройте R и Lr; найдите погружение Lr. Rake — от (аз. пад. R − 90°) к падению.", planeText(v.RakePlane), v.Rake)
 		default:
-			return "Крыло 1: " + planeText(v.Wing1) + ". Крыло 2: " + planeText(v.Wing2) + ". Постройте крылья, шарнир и обе биссекторные плоскости; определите углы."
+			return "K1: " + planeText(v.Wing1) + "; K2: " + planeText(v.Wing2) + ". Постройте крылья, шарнир H и биссектрисы A, B; определите углы."
 		}
 	}
 	switch task {
 	case "plane":
-		return "По дуге P определите азимут и угол падения плоскости. Постройте её полюс."
+		return "По дуге P определите азимут и угол падения плоскости. Постройте её полюс Np."
 	case "line":
 		return "По точке L определите азимут и угол погружения линейного элемента."
 	case "rake":
-		return "Определите падение плоскости P, азимут и угол погружения L и rake линии L в плоскости P."
+		return "По дуге R и точке Lr найдите залегание R, погружение Lr и rake. Rake — от (аз. пад. R − 90°) к падению."
 	default:
-		return "Определите падение крыльев 1 и 2, азимут и погружение шарнира, оба двугранных угла и обе биссекторные плоскости."
+		return "По K1 и K2 найдите падение крыльев, шарнир H, оба двугранных угла и биссекторные плоскости A, B."
 	}
 }
-func answers(task string, v Variant) string {
+func pairPlane(p Plane) string { return fmt.Sprintf("%.1f°/%.1f°", p.Az, p.Dip) }
+func pairLine(l Line) string   { return fmt.Sprintf("%.1f°/%.1f°", l.Trend, l.Plunge) }
+func answers(task string, v Elements) string {
 	switch task {
 	case "plane":
-		return "P: " + planeText(v.Plane) + ".\nПолюс: " + lineText(lineFromVec(v.Plane.Pole()))
+		return "P: " + pairPlane(v.Plane) + "; Np: " + pairLine(lineFromVec(v.Plane.Pole()))
 	case "line":
-		return "L: " + lineText(v.Line)
+		return "L: " + pairLine(v.Line)
 	case "rake":
-		return fmt.Sprintf("P: %s.\nRake %.0f°.\nL: %s", planeText(v.RakePlane), v.Rake, lineText(v.RakeLine))
+		return fmt.Sprintf("R: %s; Lr: %s; rake %.0f°", pairPlane(v.RakePlane), pairLine(v.RakeLine), v.Rake)
 	default:
-		return fmt.Sprintf("1: %s.\n2: %s.\nШарнир H: %s.\nУглы: %.1f° / %.1f°.\nБиссектриса A: %s.\nБиссектриса B: %s.", planeText(v.Wing1), planeText(v.Wing2), lineText(v.Fold.Hinge), v.Fold.Acute, v.Fold.Supplement, planePrecise(v.Fold.Bisector1), planePrecise(v.Fold.Bisector2))
+		return fmt.Sprintf("K1: %s; K2: %s; H: %s; углы %.1f° и %.1f°.\nБиссектрисы: A %s; B %s.", pairPlane(v.Wing1), pairPlane(v.Wing2), pairLine(v.Fold.Hinge), v.Fold.Acute, v.Fold.Supplement, pairPlane(v.Fold.Bisector1), pairPlane(v.Fold.Bisector2))
 	}
 }
-func drawTask(p *gofpdf.Fpdf, task, mode string, v Variant, top float64, teacher bool, index int) {
-	textAt(p, 14, top, fmt.Sprintf("%d. %s", index, taskName(task)), 10)
-	wrapped(p, 14, top+2, 182, prompt(task, mode, v), 8)
-	cx, cy, r := 105., top+69, 50.
-	grid(p, cx, cy, r)
-	if mode == "inverse" || teacher {
+func blankAnswer(task string) string {
+	switch task {
+	case "plane":
+		return "P: _____/_____; Np: _____/_____"
+	case "line":
+		return "L: _____/_____"
+	case "rake":
+		return "R: _____/_____; Lr: _____/_____; rake: _____"
+	default:
+		return "K1: _____/_____; K2: _____/_____; H: _____/_____; углы: _____ и _____.\nБиссектрисы: A _____/_____; B _____/_____."
+	}
+}
+func drawElements(p *gofpdf.Fpdf, c Config, v Elements, cx, cy, r float64, teacher bool) {
+	// Curves first, labels and point markers last, so intersections stay readable.
+	for _, task := range c.Tasks {
 		switch task {
 		case "plane":
 			curve(p, v.Plane, cx, cy, r, 0)
+		case "rake":
+			curve(p, v.RakePlane, cx, cy, r, 1)
+		case "fold":
+			curve(p, v.Wing1, cx, cy, r, 3)
+			curve(p, v.Wing2, cx, cy, r, 4)
+			if teacher {
+				curve(p, v.Fold.Bisector1, cx, cy, r, 2)
+				curve(p, v.Fold.Bisector2, cx, cy, r, 2)
+			}
+		}
+	}
+	for _, task := range c.Tasks {
+		switch task {
+		case "plane":
 			curveLabel(p, v.Plane, cx, cy, r, "P")
 			if teacher {
-				marker(p, lineFromVec(v.Plane.Pole()), cx, cy, r, "N", 1)
+				marker(p, lineFromVec(v.Plane.Pole()), cx, cy, r, "Np", 1)
 			}
 		case "line":
 			marker(p, v.Line, cx, cy, r, "L", 0)
 		case "rake":
-			curve(p, v.RakePlane, cx, cy, r, 0)
-			curveLabel(p, v.RakePlane, cx, cy, r, "P")
-			marker(p, v.RakeLine, cx, cy, r, "L", 0)
+			curveLabel(p, v.RakePlane, cx, cy, r, "R")
+			marker(p, v.RakeLine, cx, cy, r, "Lr", 3)
 		case "fold":
-			curve(p, v.Wing1, cx, cy, r, 0)
-			curve(p, v.Wing2, cx, cy, r, 1)
+			curveLabel(p, v.Wing1, cx, cy, r, "K1")
+			curveLabel(p, v.Wing2, cx, cy, r, "K2")
 			if teacher {
-				curve(p, v.Fold.Bisector1, cx, cy, r, 2)
-				curve(p, v.Fold.Bisector2, cx, cy, r, 2)
 				curveLabel(p, v.Fold.Bisector1, cx, cy, r, "A")
 				curveLabel(p, v.Fold.Bisector2, cx, cy, r, "B")
 				marker(p, v.Fold.Hinge, cx, cy, r, "H", 2)
 			}
-			curveLabel(p, v.Wing1, cx, cy, r, "1")
-			curveLabel(p, v.Wing2, cx, cy, r, "2")
 		}
-	}
-	if teacher {
-		wrapped(p, 14, top+19, 35, answers(task, v), 7)
-		wrapped(p, 163, top+20, 33, "ОТВЕТ\n\nN — полюс\nL — линейность\nH — шарнир\n\nПостроения:\n1 — сплошная\n2 — штриховая\nA, B — точечные", 6.5)
-	} else {
-		side := "Место для ответа\n\nАзимут: ______\n\nУгол: ______"
-		if task == "fold" {
-			side = "Шарнир\nАз.: ______\nУгол: ______\n\nУглы крыльев:\n______ / ______\n\nБиссектрисы:\nA: _____ / _____\nB: _____ / _____"
-		}
-		if task == "rake" {
-			side = "Плоскость P:\n_____ / _____\n\nЛинейность L:\n_____ / _____\n\nRake: ______"
-		}
-		wrapped(p, 14, top+20, 34, side, 7)
-		note := "Нижняя полусфера.\n\nАзимуты — от севера по часовой стрелке."
-		if task == "rake" {
-			note = "Rake: от направления простирания (аз. пад. − 90°) к линии падения, 0–90°."
-		}
-		if task == "fold" {
-			note = "1 — сплошная дуга.\n2 — штриховая.\n\nНайдите острый и смежный углы.\n\nБез полярности складки осевая поверхность неоднозначна."
-		}
-		wrapped(p, 163, top+20, 33, note, 7)
 	}
 }
 func makePDF(c Config, variants []Variant, teacher bool) ([]byte, error) {
 	p := gofpdf.New("P", "mm", "A4", "")
-	p.SetMargins(14, 10, 14)
+	p.SetMargins(12, 10, 12)
 	p.SetAutoPageBreak(false, 0)
 	p.SetCompression(true)
 	font, _ := resources.ReadFile("assets/DejaVuSans.ttf")
@@ -258,42 +277,69 @@ func makePDF(c Config, variants []Variant, teacher bool) ([]byte, error) {
 	}
 	p.SetTitle(c.Title+" — "+role, true)
 	p.SetAuthor("Сетка Вульфа · генератор заданий", true)
-	p.SetSubject("Равноугольная стереографическая проекция; нижняя полусфера", true)
+	p.SetSubject("Одна крупная сетка на лист A4; нижняя полусфера", true)
 	total := len(variants) * pagesPerVariant(c)
-	for _, v := range variants {
+	for _, variant := range variants {
 		for _, mode := range modes(c) {
-			for start := 0; start < len(c.Tasks); start += 2 {
-				p.AddPage()
-				setFont(p, 12)
-				size := 12.
-				for p.GetStringWidth(c.Title) > 182 && size > 6 {
-					size -= .5
-					setFont(p, size)
-				}
-				p.Text(14, 12, c.Title)
-				m := "Прямая задача"
-				if mode == "inverse" {
-					m = "Обратная задача"
-				}
-				textAt(p, 14, 19, fmt.Sprintf("Вариант %02d · %s · %s", v.Number, m, role), 9)
-				if !teacher {
-					textAt(p, 14, 25, "ФИО: __________________________________  Группа: __________  Дата: __________", 8)
-				} else {
-					textAt(p, 14, 25, "Расчётные ответы округлены до 0,1°. Погрешность ручного считывания: ориентир ±2°.", 8)
-				}
-				for j := 0; j < 2 && start+j < len(c.Tasks); j++ {
-					drawTask(p, c.Tasks[start+j], mode, v, 30+128*float64(j), teacher, start+j+1)
-				}
-				footer := fmt.Sprintf("Набор: %s · Вариант %02d · %d / %d", c.Seed, v.Number, p.PageNo(), total)
-				footerSize := 7.
-				setFont(p, footerSize)
-				for p.GetStringWidth(footer) > 95 && footerSize > 4 {
-					footerSize -= .25
-					setFont(p, footerSize)
-				}
-				textAt(p, 14, 290, footer, footerSize)
-				textAt(p, 113, 290, "A4 · 100% · диаметр сетки 100 мм", 7)
+			v := variant.ForMode(mode)
+			p.AddPage()
+			size := 12.
+			setFont(p, size)
+			for p.GetStringWidth(c.Title) > 186 && size > 6 {
+				size -= .5
+				setFont(p, size)
 			}
+			p.Text(12, 11, c.Title)
+			m := "Прямая задача"
+			if mode == "inverse" {
+				m = "Обратная задача · новый набор элементов"
+			}
+			textAt(p, 12, 18, fmt.Sprintf("Вариант %02d · %s · %s", variant.Number, m, role), 8)
+			if teacher {
+				textAt(p, 12, 24, "Ответы ниже сетки: азимут/угол, в градусах. Расчёт до 0,1°; ручное считывание — ориентир ±2°.", 7)
+			} else {
+				textAt(p, 12, 24, "ФИО: __________________________________  Группа: __________  Дата: __________", 8)
+			}
+			instruction := "Все перечисленные элементы нанесите СОВМЕСТНО на одну сетку."
+			if mode == "inverse" {
+				instruction = "На сетке нанесён отдельный случайный набор. Определите параметры всех обозначенных элементов."
+			}
+			textAt(p, 12, 30, instruction, 7.5)
+			p.SetDrawColor(160, 170, 160)
+			p.SetLineWidth(.15)
+			for i, task := range c.Tasks {
+				y := 34 + 8.5*float64(i)
+				p.Line(12, y, 198, y)
+				textAt(p, 12, y+3.8, elementLabel(task), 7.5)
+				setFont(p, 7.2)
+				p.SetXY(47, y+.7)
+				p.MultiCell(151, 3.4, prompt(task, mode, v), "", "L", false)
+			}
+			grid(p, 105, 166, 90)
+			if mode == "inverse" || teacher {
+				drawElements(p, c, v, 105, 166, 90, teacher)
+			}
+			textAt(p, 12, 265, "Ответы: азимут/угол, в градусах. Для плоскости — падение, для линии — погружение.", 7)
+			y := 267.
+			for _, task := range c.Tasks {
+				text := blankAnswer(task)
+				if teacher {
+					text = answers(task, v)
+				}
+				setFont(p, 7)
+				p.SetXY(12, y)
+				p.MultiCell(186, 3.4, text, "", "L", false)
+				y = p.GetY()
+			}
+			footer := fmt.Sprintf("Набор: %s · Вариант %02d · %d/%d", c.Seed, variant.Number, p.PageNo(), total)
+			size = 7
+			setFont(p, size)
+			for p.GetStringWidth(footer) > 110 && size > 4 {
+				size -= .25
+				setFont(p, size)
+			}
+			textAt(p, 12, 292, footer, size)
+			textAt(p, 136, 292, "A4 · 100% · сетка 180 мм", 7)
 		}
 	}
 	var b bytes.Buffer
@@ -305,10 +351,12 @@ func makeCSV(c Config, vs []Variant) []byte {
 	b.Write([]byte{0xef, 0xbb, 0xbf})
 	w := csv.NewWriter(&b)
 	w.Comma = ';'
-	w.Write([]string{"Вариант", "Задание", "Ответ"})
+	w.Write([]string{"Вариант", "Направление", "Задание", "Ответ"})
 	for _, v := range vs {
-		for _, t := range c.Tasks {
-			w.Write([]string{fmt.Sprint(v.Number), taskName(t), strings.ReplaceAll(answers(t, v), "\n", " ")})
+		for _, mode := range modes(c) {
+			for _, t := range c.Tasks {
+				w.Write([]string{fmt.Sprint(v.Number), mode, taskName(t), strings.ReplaceAll(answers(t, v.ForMode(mode)), "\n", " ")})
+			}
 		}
 	}
 	w.Flush()
@@ -323,15 +371,21 @@ answers.csv — краткие ответы, UTF-8 с BOM, разделител�
 settings.json — параметры набора и полные расчётные ответы.
 
 Печать: A4, «Фактический размер» / 100%, без подгонки страницы.
-Диаметр каждой сетки — 100 мм. Проверьте линейкой после печати.
-Сетки расположены по две на странице. Каждому варианту соответствуют
-все его последовательные страницы; номер указан на каждой странице.
+Диаметр каждой сетки — 180 мм. Проверьте линейкой после печати.
+На каждой странице A4 — одна крупная сетка, общая для всех элементов.
+Прямая и обратная задачи занимают по одному отдельному листу.
+Значения обратной задачи генерируются отдельно от прямой.
+При обоих направлениях: 2 листа на вариант, 40 листов на 20 вариантов.
 
 Используется приложенная сетка Wulff10sm.bmp (встроенная PNG-копия).
 Равноугольная стереографическая проекция, нижняя полусфера.
 Север сверху, восток справа; азимуты от севера по часовой стрелке.
 Плоскость задаётся азимутом ПАДЕНИЯ и углом падения.
 Линейность задаётся азимутом ПОГРУЖЕНИЯ и углом погружения.
+Обозначения общей сетки: P — плоскость, Np — её полюс; L — линия;
+R — плоскость для rake, Lr — линия в ней; K1, K2 — крылья складки.
+P — сплошная, R — штриховая, K1 — длинные штрихи, K2 — штрихпунктир.
+В ответах дополнительно H — шарнир, A и B — биссекторные плоскости.
 Rake отсчитывается в плоскости от направления простирания
 (азимут падения − 90°) к направлению падения; диапазон 0–90°.
 Числа в ключе округлены до 0,1°; для ручного считывания ориентир ±2°.
@@ -347,7 +401,7 @@ Rake отсчитывается в плоскости от направлени�
 произвольной природной осевой поверхности.
 
 Повторение набора: введите тот же код набора, шаг, типы заданий,
-режим и количество в той же версии программы (алгоритм wulff-v1).
+режим и количество в той же версии программы (алгоритм wulff-v2).
 Увеличение количества сохраняет первые варианты при прочих равных.
 Программа не требует интернета и не отправляет данные на серверы.
 `
@@ -366,7 +420,7 @@ func buildFiles(c Config) (map[string][]byte, error) {
 		Algorithm string    `json:"algorithm"`
 		Config    Config    `json:"config"`
 		Variants  []Variant `json:"variants"`
-	}{"wulff-v1", c, vs}
+	}{"wulff-v2", c, vs}
 	j, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		return nil, err

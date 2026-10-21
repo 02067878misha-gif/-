@@ -19,8 +19,7 @@ type Config struct {
 	Tasks []string `json:"tasks"`
 	Title string   `json:"title"`
 }
-type Variant struct {
-	Number    int        `json:"number"`
+type Elements struct {
 	Plane     Plane      `json:"plane"`
 	Line      Line       `json:"line"`
 	RakePlane Plane      `json:"rake_plane"`
@@ -29,6 +28,18 @@ type Variant struct {
 	Wing1     Plane      `json:"wing_1"`
 	Wing2     Plane      `json:"wing_2"`
 	Fold      FoldAnswer `json:"fold_answer"`
+}
+type Variant struct {
+	Number int `json:"number"`
+	Elements
+	Inverse Elements `json:"inverse"`
+}
+
+func (v Variant) ForMode(mode string) Elements {
+	if mode == "inverse" {
+		return v.Inverse
+	}
+	return v.Elements
 }
 
 func defaultConfig() Config {
@@ -76,62 +87,68 @@ func (c *Config) Validate() error {
 	return nil
 }
 func generate(c Config) []Variant {
-	h := sha256.Sum256([]byte("wulff-v1/" + c.Seed))
-	r := mathrand.New(mathrand.NewSource(int64(binary.LittleEndian.Uint64(h[:8]))))
+	rng := func(domain string) *mathrand.Rand {
+		h := sha256.Sum256([]byte("wulff-v2/" + domain + "/" + c.Seed))
+		return mathrand.New(mathrand.NewSource(int64(binary.LittleEndian.Uint64(h[:8]))))
+	}
+	forward, inverse := rng("forward"), rng("inverse")
+	used := map[string]bool{}
+	out := make([]Variant, c.Count)
+	for i := range out {
+		out[i] = Variant{Number: i + 1, Elements: generateElements(c, forward, used), Inverse: generateElements(c, inverse, used)}
+	}
+	return out
+}
+
+func generateElements(c Config, r *mathrand.Rand, used map[string]bool) Elements {
 	angle := func(min, max int) float64 {
 		lo := (min + c.Step - 1) / c.Step
 		hi := max / c.Step
 		return float64((lo + r.Intn(hi-lo+1)) * c.Step)
 	}
 	plane := func() Plane { return Plane{angle(0, 360-c.Step), angle(15, 75)} }
-	out := make([]Variant, c.Count)
-	used := map[string]bool{}
-	for i := range out {
+	for {
+		v := Elements{Plane: plane(), Line: Line{angle(0, 360-c.Step), angle(10, 70)}, RakePlane: plane(), Rake: angle(15, 75)}
+		v.RakeLine = v.RakePlane.RakeLine(v.Rake)
 		for {
-			v := Variant{Number: i + 1, Plane: plane(), Line: Line{angle(0, 360-c.Step), angle(10, 70)}, RakePlane: plane(), Rake: angle(15, 75)}
-			v.RakeLine = v.RakePlane.RakeLine(v.Rake)
-			for {
-				v.Wing1, v.Wing2 = plane(), plane()
-				n1, n2 := v.Wing1.Pole(), v.Wing2.Pole()
-				if n1.Cross(n2).Dot(n1.Cross(n2)) < 1e-8 {
-					continue
-				}
-				v.Fold = solveFold(v.Wing1, v.Wing2)
-				if v.Fold.Acute >= 25 && v.Fold.Acute <= 80 && v.Fold.Hinge.Plunge <= 65 {
-					break
-				}
-			}
-			// Ensure uniqueness even if only one task type is selected.
-			keys := []string{}
-			for _, task := range c.Tasks {
-				var k string
-				switch task {
-				case "plane":
-					k = fmt.Sprint(v.Plane)
-				case "line":
-					k = fmt.Sprint(v.Line)
-				case "rake":
-					k = fmt.Sprint(v.RakePlane, v.Rake)
-				case "fold":
-					k = fmt.Sprint(v.Wing1, v.Wing2)
-				}
-				keys = append(keys, task+k)
-			}
-			duplicate := false
-			for _, k := range keys {
-				if used[k] {
-					duplicate = true
-				}
-			}
-			if duplicate {
+			v.Wing1, v.Wing2 = plane(), plane()
+			n1, n2 := v.Wing1.Pole(), v.Wing2.Pole()
+			if n1.Cross(n2).Dot(n1.Cross(n2)) < 1e-8 {
 				continue
 			}
-			for _, k := range keys {
-				used[k] = true
+			v.Fold = solveFold(v.Wing1, v.Wing2)
+			if v.Fold.Acute >= 25 && v.Fold.Acute <= 80 && v.Fold.Hinge.Plunge <= 65 {
+				break
 			}
-			out[i] = v
-			break
 		}
+		// Ensure uniqueness even if only one task type is selected.
+		keys := []string{}
+		for _, task := range c.Tasks {
+			var k string
+			switch task {
+			case "plane":
+				k = fmt.Sprint(v.Plane)
+			case "line":
+				k = fmt.Sprint(v.Line)
+			case "rake":
+				k = fmt.Sprint(v.RakePlane, v.Rake)
+			case "fold":
+				k = fmt.Sprint(v.Wing1, v.Wing2)
+			}
+			keys = append(keys, task+k)
+		}
+		duplicate := false
+		for _, k := range keys {
+			if used[k] {
+				duplicate = true
+			}
+		}
+		if duplicate {
+			continue
+		}
+		for _, k := range keys {
+			used[k] = true
+		}
+		return v
 	}
-	return out
 }

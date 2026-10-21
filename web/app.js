@@ -7,8 +7,8 @@ function updateEstimate() {
   const tasks = form.querySelectorAll('[name=task]:checked').length;
   const count = Number(form.count.value);
   const modes = form.mode.value === 'both' ? 2 : 1;
-  const pages = Math.ceil(tasks / 2) * modes;
-  estimate.textContent = tasks ? `${count || '—'} вариантов · ${pages} стр. на вариант · ${count * pages || '—'} стр. в PDF заданий + отдельный PDF ответов` : 'Выберите хотя бы один тип задания.';
+  const pages = modes;
+  estimate.textContent = tasks ? `${count || '—'} вариантов · ${pages} стр. на вариант · одна сетка 180 мм на лист · ${count * pages || '—'} стр. в PDF заданий + отдельный PDF ответов` : 'Выберите хотя бы один тип задания.';
 }
 form.addEventListener('input', updateEstimate);
 updateEstimate();

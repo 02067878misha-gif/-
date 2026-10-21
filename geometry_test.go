@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -80,28 +81,30 @@ func TestGeneratedGeometry(t *testing.T) {
 				t.Fatal(err)
 			}
 			vs := generate(c)
-			for _, v := range vs {
-				for _, p := range []Plane{v.Plane, v.RakePlane, v.Wing1, v.Wing2} {
-					sameAxis(t, planeFromPole(p.Pole()).Pole(), p.Pole())
-					for _, pt := range greatCircle(p) {
-						near(t, unproject(pt).Dot(p.Pole()), 0, 1e-9)
-						if pt.X*pt.X+pt.Y*pt.Y > 1+1e-9 {
-							t.Fatal("point outside net")
+			for _, pair := range vs {
+				for _, v := range []Elements{pair.Elements, pair.Inverse} {
+					for _, p := range []Plane{v.Plane, v.RakePlane, v.Wing1, v.Wing2} {
+						sameAxis(t, planeFromPole(p.Pole()).Pole(), p.Pole())
+						for _, pt := range greatCircle(p) {
+							near(t, unproject(pt).Dot(p.Pole()), 0, 1e-9)
+							if pt.X*pt.X+pt.Y*pt.Y > 1+1e-9 {
+								t.Fatal("point outside net")
+							}
 						}
 					}
+					near(t, v.RakePlane.Pole().Dot(v.RakeLine.Vec()), 0, 1e-9)
+					near(t, v.RakePlane.RakeOf(v.RakeLine), v.Rake, 1e-9)
+					h := v.Fold.Hinge.Vec()
+					near(t, h.Dot(v.Wing1.Pole()), 0, 1e-9)
+					near(t, h.Dot(v.Wing2.Pole()), 0, 1e-9)
+					a, b := v.Fold.Bisector1.Pole(), v.Fold.Bisector2.Pole()
+					near(t, a.Dot(b), 0, 1e-9)
+					for _, n := range []Vec{a, b} {
+						near(t, math.Abs(n.Dot(v.Wing1.Pole())), math.Abs(n.Dot(v.Wing2.Pole())), 1e-9)
+						near(t, n.Dot(h), 0, 1e-9)
+					}
+					near(t, v.Fold.Acute+v.Fold.Supplement, 180, 1e-9)
 				}
-				near(t, v.RakePlane.Pole().Dot(v.RakeLine.Vec()), 0, 1e-9)
-				near(t, v.RakePlane.RakeOf(v.RakeLine), v.Rake, 1e-9)
-				h := v.Fold.Hinge.Vec()
-				near(t, h.Dot(v.Wing1.Pole()), 0, 1e-9)
-				near(t, h.Dot(v.Wing2.Pole()), 0, 1e-9)
-				a, b := v.Fold.Bisector1.Pole(), v.Fold.Bisector2.Pole()
-				near(t, a.Dot(b), 0, 1e-9)
-				for _, n := range []Vec{a, b} {
-					near(t, math.Abs(n.Dot(v.Wing1.Pole())), math.Abs(n.Dot(v.Wing2.Pole())), 1e-9)
-					near(t, n.Dot(h), 0, 1e-9)
-				}
-				near(t, v.Fold.Acute+v.Fold.Supplement, 180, 1e-9)
 			}
 		}
 	}
@@ -151,5 +154,36 @@ func TestInvalidConfig(t *testing.T) {
 		if c.Validate() == nil {
 			t.Fatal("accepted invalid config", c)
 		}
+	}
+}
+
+func TestInverseUsesDistinctElements(t *testing.T) {
+	c := defaultConfig()
+	c.Seed = "independent-values"
+	vs := generate(c)
+	planes := map[Plane]bool{}
+	lines := map[Line]bool{}
+	rakes := map[string]bool{}
+	folds := map[string]bool{}
+	for _, v := range vs {
+		for _, e := range []Elements{v.Elements, v.Inverse} {
+			if planes[e.Plane] || lines[e.Line] {
+				t.Fatal("repeated forward/inverse input")
+			}
+			planes[e.Plane] = true
+			lines[e.Line] = true
+			rk := fmt.Sprint(e.RakePlane, e.Rake)
+			fk := fmt.Sprint(e.Wing1, e.Wing2)
+			if rakes[rk] || folds[fk] {
+				t.Fatal("repeated forward/inverse task")
+			}
+			rakes[rk] = true
+			folds[fk] = true
+		}
+	}
+	// Switching presentation direction must not change either data set.
+	c.Mode = "inverse"
+	if !reflect.DeepEqual(vs, generate(c)) {
+		t.Fatal("data depends on mode")
 	}
 }

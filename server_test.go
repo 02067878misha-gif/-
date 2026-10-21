@@ -30,7 +30,7 @@ func TestGenerateAndDownload(t *testing.T) {
 	if err := json.Unmarshal(r.Body.Bytes(), &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.Pages != 4 || result.Seed != c.Seed {
+	if result.Pages != 2 || result.Seed != c.Seed {
 		t.Fatal(result)
 	}
 	get := func(path string) *httptest.ResponseRecorder {
@@ -88,11 +88,11 @@ func TestGenerateAndDownload(t *testing.T) {
 }
 func TestModesAndPageCounts(t *testing.T) {
 	c := defaultConfig()
-	if pagesPerVariant(c) != 4 {
+	if pagesPerVariant(c) != 2 {
 		t.Fatal("both-mode count")
 	}
 	c.Mode = "inverse"
-	if pagesPerVariant(c) != 2 {
+	if pagesPerVariant(c) != 1 {
 		t.Fatal("inverse count")
 	}
 	c.Tasks = c.Tasks[:1]
