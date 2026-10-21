@@ -1,54 +1,233 @@
 'use strict';
-const form = document.querySelector('#settings');
-const statusEl = document.querySelector('#status');
-const button = document.querySelector('#generate');
-const estimate = document.querySelector('#estimate');
-function updateEstimate() {
-  const tasks = form.querySelectorAll('[name=task]:checked').length;
-  const count = Number(form.count.value);
-  const modes = form.mode.value === 'both' ? 2 : 1;
-  const pages = modes;
-  estimate.textContent = tasks ? `${count || '—'} вариантов · ${pages} стр. на вариант · одна сетка 180 мм на лист · ${count * pages || '—'} стр. в PDF заданий + отдельный PDF ответов` : 'Выберите хотя бы один тип задания.';
+const $ = selector => document.querySelector(selector);
+const form = $('#settings');
+const fields = form.elements;
+const statusEl = $('#status');
+const resultEl = $('#result');
+const dialog = $('#help-dialog');
+const generateButton = $('#generate');
+const taskInputs = [...form.querySelectorAll('[name=task]')];
+let busy = false;
+let lastSet = null;
+let previewMode = 'forward';
+let copyTimer;
+const defaultTitle = 'Стереографические проекции';
+const modeNames = { both: 'прямые и обратные', forward: 'прямые задачи', inverse: 'обратные задачи' };
+function plural(n, forms) {
+  const k = Math.abs(n) % 100;
+  return k > 10 && k < 20 ? forms[2] : (k % 10 === 1 ? forms[0] : (k % 10 >= 2 && k % 10 <= 4 ? forms[1] : forms[2]));
 }
-form.addEventListener('input', updateEstimate);
-updateEstimate();
-form.addEventListener('submit', async event => {
-  event.preventDefault();
-  const tasks = [...form.querySelectorAll('[name=task]:checked')].map(el => el.value);
-  if (!tasks.length) { statusEl.textContent = 'Выберите хотя бы один тип задания.'; statusEl.className = 'status error'; return; }
-  const data = { count: Number(form.count.value), title: form.title.value.trim(), step: Number(form.step.value), mode: form.mode.value, seed: form.seed.value.trim(), tasks };
-  button.disabled = true;
-  statusEl.className = 'status';
-  statusEl.textContent = 'Подбираем значения и строим PDF…';
-  try {
-    const response = await fetch('generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Ошибка генерации');
-    const names = { zip: 'wulff-set.zip', students: 'students.pdf', teacher: 'teacher.pdf', csv: 'answers.csv', json: 'settings.json', guide: 'student_guide.pdf' };
-    for (const [id, name] of Object.entries(names)) {
-      const a = document.getElementById(id); a.href = `download/${result.job}/${name}`; a.download = name;
+function readConfig() {
+  return {
+    count: Number(fields.namedItem('count').value),
+    title: fields.namedItem('title').value.trim() || defaultTitle,
+    step: Number(fields.namedItem('step').value),
+    mode: fields.namedItem('mode').value,
+    seed: fields.namedItem('seed').value.trim(),
+    tasks: taskInputs.filter(el => el.checked).map(el => el.value),
+  };
+}
+function setStatus(message = '', error = false) {
+  statusEl.className = error ? 'status error' : 'status';
+  statusEl.textContent = message;
+}
+function clearErrors() {
+  for (const name of ['count', 'tasks']) {
+    const el = $(`#${name}-error`); el.textContent = ''; el.hidden = true;
+  }
+  fields.namedItem('count').removeAttribute('aria-invalid');
+  taskInputs.forEach(el => el.removeAttribute('aria-invalid'));
+}
+function updatePreview(c) {
+  if (c.mode !== 'both') previewMode = c.mode;
+  const panel = $('#overview'); panel.dataset.mode = c.mode; panel.dataset.preview = previewMode;
+  for (const tab of document.querySelectorAll('[data-preview]')) {
+    tab.hidden = c.mode !== 'both' && tab.dataset.preview !== c.mode;
+    const selected = tab.dataset.preview === previewMode;
+    tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1;
+  }
+  $('#sheet-preview').setAttribute('aria-labelledby', `preview-${previewMode}`);
+  $('#sheet-mode').textContent = previewMode === 'inverse' ? 'Обратная задача' : 'Прямая задача';
+  document.querySelectorAll('[data-plot]').forEach(el => { el.hidden = !c.tasks.includes(el.dataset.plot); });
+  const lines = c.tasks.map(() => document.createElement('i'));
+  $('.sheet-lines').replaceChildren(...lines);
+}
+function updateSummary() {
+  const c = readConfig();
+  const validCount = Number.isInteger(c.count) && c.count >= 1 && c.count <= 20;
+  const count = validCount ? c.count : null;
+  const pages = c.mode === 'both' ? 2 : 1;
+  const total = count && c.tasks.length ? count * pages : null;
+  $('#task-count').textContent = `${c.tasks.length} / 4`;
+  $('#toggle-tasks').textContent = c.tasks.length === 4 ? 'Снять всё' : 'Выбрать всё';
+  $('#summary-count').textContent = count ?? '—';
+  $('#summary-count-label').textContent = count ? plural(count, ['вариант', 'варианта', 'вариантов']) : 'вариантов';
+  $('#summary-pages').textContent = pages;
+  $('#summary-pages-label').textContent = pages === 2 ? 'листа на вариант' : 'лист на вариант';
+  $('#summary-total').textContent = total ?? '—';
+  const pageText = total ? `${total} ${plural(total, ['страница', 'страницы', 'страниц'])}` : 'выберите параметры';
+  $('#students-pages').textContent = `PDF · ${pageText}`;
+  $('#teacher-pages').textContent = `PDF · ${pageText} + таблица Excel`;
+  $('#estimate').textContent = total ? `${count} ${plural(count, ['вариант', 'варианта', 'вариантов'])} · ${total} стр. заданий + ${total} стр. ответов` : (c.tasks.length ? 'Укажите от 1 до 20 вариантов' : 'Выберите хотя бы один тип задания');
+  $('#count-minus').disabled = busy || (validCount && count <= 1);
+  $('#count-plus').disabled = busy || (validCount && count >= 20);
+  document.querySelectorAll('[data-count]').forEach(el => el.setAttribute('aria-pressed', String(Number(el.dataset.count) === count)));
+  $('#dirty-note').hidden = !lastSet || JSON.stringify(c) === JSON.stringify(lastSet.input) || JSON.stringify(c) === JSON.stringify(lastSet.config);
+  if (validCount) { $('#count-error').hidden = true; fields.namedItem('count').removeAttribute('aria-invalid'); }
+  if (c.tasks.length) { $('#tasks-error').hidden = true; taskInputs.forEach(el => el.removeAttribute('aria-invalid')); }
+  updatePreview(c);
+}
+function focusSection(selector) {
+  const el = $(selector);
+  el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  if (selector === '#result') $('#result-heading').focus({ preventScroll: true });
+}
+function navState(which) {
+  $('#nav-create').classList.toggle('is-active', which === 'create');
+  $('#nav-files').classList.toggle('is-active', which === 'files');
+  if (which === 'create') { $('#nav-create').setAttribute('aria-current', 'location'); $('#nav-files').removeAttribute('aria-current'); }
+  else { $('#nav-files').setAttribute('aria-current', 'location'); $('#nav-create').removeAttribute('aria-current'); }
+}
+function setBusy(value) {
+  busy = value;
+  form.setAttribute('aria-busy', String(value));
+  form.querySelectorAll('input, select, button').forEach(el => { el.disabled = value; });
+  $('#reuse-settings').disabled = value; $('#copy-seed').disabled = value;
+  $('#summary-generate').disabled = value; $('#summary-generate span').textContent = value ? 'Создаём PDF…' : 'Создать комплект PDF';
+  generateButton.querySelector('.button-label').textContent = value ? 'Создаём варианты и PDF…' : 'Создать комплект PDF';
+  generateButton.querySelector('.spinner').hidden = !value;
+  generateButton.querySelector('.button-arrow').hidden = value;
+  updateSummary();
+}
+function validate(c) {
+  clearErrors(); let target = null;
+  if (!Number.isInteger(c.count) || c.count < 1 || c.count > 20) {
+    $('#count-error').textContent = 'Введите целое число от 1 до 20.'; $('#count-error').hidden = false;
+    fields.namedItem('count').setAttribute('aria-invalid', 'true'); target = fields.namedItem('count');
+  }
+  if (!c.tasks.length) {
+    $('#tasks-error').textContent = 'Выберите хотя бы один элемент для построения.'; $('#tasks-error').hidden = false;
+    taskInputs.forEach(el => el.setAttribute('aria-invalid', 'true')); target ??= taskInputs[0];
+  }
+  if (target) { target.focus(); setStatus('Проверьте выделенные настройки перед созданием PDF.', true); return false; }
+  return true;
+}
+form.addEventListener('input', updateSummary);
+form.addEventListener('change', updateSummary);
+for (const button of document.querySelectorAll('[data-count]')) {
+  button.addEventListener('click', () => { fields.namedItem('count').value = button.dataset.count; updateSummary(); });
+}
+for (const [selector, delta] of [['#count-minus', -1], ['#count-plus', 1]]) {
+  $(selector).addEventListener('click', () => {
+    const current = Number(fields.namedItem('count').value);
+    fields.namedItem('count').value = Math.min(20, Math.max(1, (Number.isFinite(current) ? Math.round(current) : 1) + delta));
+    updateSummary();
+  });
+}
+$('#toggle-tasks').addEventListener('click', () => {
+  const chooseAll = taskInputs.some(el => !el.checked);
+  taskInputs.forEach(el => { el.checked = chooseAll; }); updateSummary();
+});
+$('#reset').addEventListener('click', () => { HTMLFormElement.prototype.reset.call(form); previewMode = 'forward'; clearErrors(); setStatus(); updateSummary(); });
+for (const tab of document.querySelectorAll('[data-preview]')) {
+  tab.addEventListener('click', () => { previewMode = tab.dataset.preview; updatePreview(readConfig()); });
+  tab.addEventListener('keydown', event => {
+    const tabs = [...document.querySelectorAll('[data-preview]')].filter(el => !el.hidden);
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    let index = tabs.indexOf(tab);
+    index = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[index].click(); tabs[index].focus();
+  });
+}
+function showSet(result, config) {
+  lastSet = { input: structuredClone(config), config: { ...structuredClone(config), seed: result.seed }, result };
+  const names = { zip: 'wulff-set.zip', students: 'students.pdf', teacher: 'teacher.pdf', guide: 'student_guide.pdf', csv: 'answers.csv', json: 'settings.json' };
+  for (const [id, name] of Object.entries(names)) {
+    for (const anchor of [$(`#${id}`), ...document.querySelectorAll(`[data-download="${id}"]`)]) {
+      anchor.href = `download/${result.job}/${name}`; anchor.download = name;
     }
-    document.getElementById('view').href = `download/${result.job}/students.pdf?inline=1`;
-    document.getElementById('result-meta').textContent = `${result.count} вариантов · ${result.pages} стр. заданий и ${result.pages} стр. ответов · код набора: ${result.seed}`;
-    document.getElementById('initial-preview').hidden = true;
-    document.getElementById('result').hidden = false;
-    statusEl.textContent = `Готово. Код набора: ${result.seed}. Файлы доступны справа.`;
-    // Keep an empty seed empty: the next click should create a new set.
+  }
+  $('#view').href = `download/${result.job}/students.pdf?inline=1`;
+  $('#result-heading').textContent = config.title;
+  $('#result-meta').textContent = `${result.count} ${plural(result.count, ['вариант', 'варианта', 'вариантов'])} · ${modeNames[config.mode]} · ${result.pages} стр. заданий и ${result.pages} стр. ответов`;
+  $('#result-seed').textContent = result.seed;
+  $('#students-description').textContent = `${result.pages} ${plural(result.pages, ['страница', 'страницы', 'страниц'])} · A4 · сетка 180 мм`;
+  $('#teacher-description').textContent = `${result.pages} ${plural(result.pages, ['страница', 'страницы', 'страниц'])} · построения и численные ответы`;
+  $('#nav-files').disabled = false; $('#nav-files').title = 'Перейти к готовым файлам'; $('#nav-file-count').textContent = '6';
+  $('#workflow-ready').classList.add('is-ready');
+  $('#result-notice').textContent = ''; clearTimeout(copyTimer); $('#copy-seed span').textContent = 'Копировать';
+  resultEl.hidden = false;
+  updateSummary(); navState('files');
+  if (!dialog.open) focusSection('#result');
+}
+form.addEventListener('submit', async event => {
+  event.preventDefault(); if (busy) return;
+  const config = readConfig(); if (!validate(config)) return;
+  setBusy(true); setStatus('Подбираем разные значения, строим задания и отдельный ключ преподавателя…');
+  try {
+    const response = await fetch('generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Не удалось создать комплект. Попробуйте ещё раз.');
+    showSet(result, config);
+    setStatus('Комплект готов. Скачайте задания и ответы в блоке «Готовые файлы».');
   } catch (error) {
-    statusEl.className = 'status error';
-    statusEl.textContent = `${error.message}. Если программа закрыта, запустите её снова.`;
-  } finally { button.disabled = false; }
+    setStatus(error instanceof TypeError ? 'Нет соединения с программой. Запустите WulffGenerator.exe заново и повторите создание.' : error.message, true);
+  } finally { setBusy(false); }
+});
+$('#nav-create').addEventListener('click', () => navState('create'));
+$('#nav-files').addEventListener('click', () => { if (lastSet) { navState('files'); focusSection('#result'); } });
+$('#reuse-settings').addEventListener('click', () => {
+  if (!lastSet || busy) return;
+  const c = lastSet.config;
+  fields.namedItem('title').value = c.title; fields.namedItem('count').value = c.count;
+  fields.namedItem('step').value = c.step; fields.namedItem('mode').value = c.mode; fields.namedItem('seed').value = c.seed;
+  taskInputs.forEach(el => { el.checked = c.tasks.includes(el.value); });
+  $('#seed-options').open = true; clearErrors(); updateSummary(); navState('create');
+  focusSection('#settings');
+  setStatus('Настройки и код этого набора восстановлены. Нажмите «Создать комплект PDF», чтобы повторить его.');
+});
+$('#copy-seed').addEventListener('click', async () => {
+  if (!lastSet) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(lastSet.result.seed); ok = true; }
+  catch {
+    const input = document.createElement('textarea'); input.value = lastSet.result.seed;
+    input.setAttribute('aria-label', 'Код набора для копирования'); input.className = 'copy-fallback'; document.body.append(input); input.select();
+    try { ok = document.execCommand('copy'); } catch {}
+    input.remove();
+  }
+  if (ok) {
+    $('#copy-seed span').textContent = 'Скопировано'; $('#result-notice').textContent = 'Код набора скопирован. Для повторения используйте те же настройки.';
+    clearTimeout(copyTimer); copyTimer = setTimeout(() => { $('#copy-seed span').textContent = 'Копировать'; }, 2200);
+  } else { $('#result-notice').textContent = 'Выделите код набора и скопируйте его сочетанием Ctrl+C.'; }
+});
+for (const button of document.querySelectorAll('[data-help]')) {
+  button.addEventListener('click', () => { dialog.showModal(); document.body.classList.add('dialog-open'); });
+}
+$('#close-help').addEventListener('click', () => dialog.close());
+dialog.addEventListener('close', () => document.body.classList.remove('dialog-open'));
+dialog.addEventListener('click', event => {
+  if (event.target !== dialog) return;
+  const r = dialog.getBoundingClientRect();
+  if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close();
+});
+document.addEventListener('keydown', event => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !busy && !dialog.open) { event.preventDefault(); form.requestSubmit(); }
 });
 const heartbeat = setInterval(() => fetch('ping').catch(() => {}), 30000);
-document.getElementById('quit').addEventListener('click', async () => {
+$('#quit').addEventListener('click', async () => {
   try {
-    const r = await fetch('quit', { method: 'POST' });
-    if (!r.ok) throw new Error();
-    clearInterval(heartbeat);
-    document.body.replaceChildren();
-    const box = document.createElement('div'); box.className = 'closed';
+    const response = await fetch('quit', { method: 'POST' }); if (!response.ok) throw new Error();
+    clearInterval(heartbeat); clearTimeout(copyTimer);
+    document.body.replaceChildren(); document.body.className = 'closed-page';
+    const box = document.createElement('section'); box.className = 'card closed-card';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('class', 'icon');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'm5 12 4 4L19 6'); svg.append(path);
     const h = document.createElement('h1'); h.textContent = 'Программа закрыта';
-    const p = document.createElement('p'); p.textContent = 'Скачанные файлы сохранены в папке загрузок. Эту вкладку можно закрыть.';
-    box.append(h, p); document.body.append(box);
-  } catch { statusEl.className = 'status error'; statusEl.textContent = 'Программа уже закрыта или соединение потеряно.'; }
+    const p = document.createElement('p'); p.textContent = 'Скачанные файлы остались в папке загрузок. Эту вкладку можно закрыть.';
+    const small = document.createElement('small'); small.textContent = 'Чтобы создать новую работу, снова запустите WulffGenerator.exe.';
+    box.append(svg, h, p, small); document.body.append(box); h.tabIndex = -1; h.focus();
+  } catch { setStatus('Программа уже закрыта или соединение потеряно.', true); }
 });
+updateSummary();

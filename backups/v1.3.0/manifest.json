@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "version": "1.3.0",
+  "tag": "v1.3.0",
+  "archive": "WulffGenerator_Windows_x64_v1.3.zip",
+  "sha256": "d4973e61cc91b814bdad09d704a9f8e19abeea89f8e26156da61197d806570dd",
+  "source_zip_sha256": "dfc2828267ac2cff2fbc86aca6d1510127eee1d13470cd65380b9f230094e50e",
+  "provenance": "Recovered from the previously generated release and source archives in this task."
+}
