@@ -1,0 +1,36 @@
+name: Back up versions
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: backup-main
+  cancel-in-progress: false
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.3'
+      - name: Configure backup author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Check application and backup tools
+        run: |
+          go test ./...
+          go vet ./...
+          python3 -m unittest discover -s scripts/tests -v
+      - name: Save immutable version backup and tag
+        run: python3 scripts/backup_version.py --push
+      - name: Publish backed-up versions without replacing releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 scripts/publish_releases.py --repo "$GH_REPO"
