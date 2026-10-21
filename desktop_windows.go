@@ -144,7 +144,7 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 					}}}},
 					{Title: "Цвета элементов", Layout: d.VBox{MarginsZero: true}, Children: []d.Widget{d.ScrollView{Layout: d.VBox{Spacing: 10}, HorizontalFixed: true, Children: colorWidgets}}},
 					{Title: "Памятка", Layout: d.VBox{Spacing: 10}, Children: []d.Widget{
-						d.TextEdit{AssignTo: &ui.help, ReadOnly: true, VScroll: true, Text: desktopHelpText, StretchFactor: 1},
+						d.TextEdit{AssignTo: &ui.help, ReadOnly: true, VScroll: true, Text: strings.ReplaceAll(desktopHelpText, "\n", "\r\n"), StretchFactor: 1},
 						d.PushButton{Text: "Открыть печатную памятку PDF", OnClicked: ui.openGuide},
 					}},
 				}},
@@ -278,7 +278,14 @@ func (ui *desktopWindow) config() Config {
 	for _, row := range ui.rows {
 		color := row.color
 		color.Name = strings.TrimSpace(row.name.Text())
-		if !c.ColorsEnabled && color.Name == "" {
+		active := false
+		for _, task := range c.Tasks {
+			if task == row.entry.Task {
+				active = true
+				break
+			}
+		}
+		if color.Name == "" && (!c.ColorsEnabled || !active) {
 			color.Name = row.entry.Default.Name
 		}
 		c.ElementColors[row.entry.Key] = color
