@@ -1,0 +1,32 @@
+name: Windows desktop checks
+on:
+  push:
+    branches: [main, 'gui-check/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.3'
+      - name: Test native controls and generate a complete set
+        env:
+          WULFF_GUI_SCREENSHOTS: '${{ github.workspace }}\dist\native-screenshots'
+        run: go test -v -timeout 120s ./...
+      - name: Vet Windows code
+        run: go vet ./...
+      - name: Build standalone Windows program
+        run: go build -trimpath -ldflags '-s -w -H=windowsgui' -o dist/WulffGenerator.exe .
+      - name: Keep Windows screenshots and executable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-desktop
+          path: |
+            dist/native-screenshots/*.png
+            dist/WulffGenerator.exe

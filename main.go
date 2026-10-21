@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "1.4.0"
+const version = "1.5.0"
 
 type app struct {
 	mu       sync.RWMutex
@@ -205,6 +205,7 @@ func main() {
 	flag.StringVar(&c.Title, "title", c.Title, "Заголовок")
 	flag.BoolVar(&c.ColorsEnabled, "colors", false, "Цветные элементы и подписи цветов для студентов")
 	noBrowser := flag.Bool("no-browser", false, "Не открывать браузер")
+	browser := flag.Bool("browser", false, "Открыть браузерный интерфейс вместо окна Windows")
 	versionFlag := flag.Bool("version", false, "Версия")
 	flag.Parse()
 	if *versionFlag {
@@ -243,6 +244,15 @@ func main() {
 		}
 		fmt.Printf("Готово: %d вариантов, %d страниц заданий и столько же ответов. Код: %s. Папка: %s\n", c.Count, c.Count*pagesPerVariant(c), c.Seed, *out)
 		return
+	}
+	if !*noBrowser && !*browser {
+		c.Tasks = strings.Split(*tasks, ",")
+		if handled, err := runDesktop(c); handled {
+			if err != nil {
+				log.Print(err)
+			}
+			return
+		}
 	}
 	l, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {

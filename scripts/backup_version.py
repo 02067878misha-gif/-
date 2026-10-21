@@ -114,14 +114,14 @@ def prepare(destination, go, repo=ROOT):
                 z.write(source, source.name)
                 z.write(repo / 'README.md', 'README.md')
                 z.writestr('START_HERE.txt', '\ufeffРаспакуйте архив и запустите WulffGenerator.exe.\n'
-                           'Интерфейс откроется в браузере; интернет не нужен.\n'
+                           'Откроется отдельное окно Windows; браузер и интернет не нужны.\n'
                            'Примеры заданий и ответы находятся в examples.\n'
                            'Печать A4: фактический размер / 100%. Подробности — README.md.\n')
                 for p in sorted(examples.iterdir()):
                     if p.name != 'wulff-set.zip':
                         z.write(p, 'examples/' + p.name)
-                for name in ['FONT-LICENSE.txt', 'GOFPDF-LICENSE.txt']:
-                    z.write(repo / 'assets' / name, 'licenses/' + name)
+                for license_path in sorted((repo / 'assets').glob('*-LICENSE.txt')):
+                    z.write(license_path, 'licenses/' + license_path.name)
                 goroot = Path(run([go, 'env', 'GOROOT'], capture=True).strip())
                 z.write(goroot / 'LICENSE', 'licenses/GO-LICENSE.txt')
             meta = {'schema': 1, 'version': v, 'tag': 'v' + v, 'archive': archive.name,
