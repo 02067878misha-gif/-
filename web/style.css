@@ -245,12 +245,12 @@ dialog::backdrop { background: #0c251d75; backdrop-filter: blur(4px); }
 .dialog-intro { font-size: 11px; line-height: 1.8; color: #859078; margin: 19px 0; }
 .help-section { padding: 17px 0; border-top: 1px solid #e5eade; }
 .help-section summary { font-size: 12px; font-weight: 600; cursor: pointer; line-height: 1.6; }
-.lecture-steps { list-style: none; counter-reset: steps; padding: 0; margin: 20px 0 0; }
-.lecture-steps li { counter-increment: steps; position: relative; padding-left: 37px; margin: 20px 0; }
-.lecture-steps li:before { content: counter(steps, decimal-leading-zero); position: absolute; left: 0; top: 0; color: #9caa8c; font-size: 10px; }
-.lecture-steps b { font-size: 12px; font-weight: 500; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
-.lecture-steps small { font-size: 9px; color: #a3ad98; font-weight: 400; }
-.lecture-steps p, .help-copy p { font-size: 11px; line-height: 1.9; color: #7b8970; margin: 7px 0 0; }
+.construction-steps { list-style: none; counter-reset: steps; padding: 0; margin: 20px 0 0; }
+.construction-steps li { counter-increment: steps; position: relative; padding-left: 37px; margin: 20px 0; }
+.construction-steps li:before { content: counter(steps, decimal-leading-zero); position: absolute; left: 0; top: 0; color: #9caa8c; font-size: 10px; }
+.construction-steps b { font-size: 12px; font-weight: 500; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.construction-steps small { font-size: 9px; color: #a3ad98; font-weight: 400; }
+.construction-steps p, .help-copy p { font-size: 11px; line-height: 1.9; color: #7b8970; margin: 7px 0 0; }
 .help-copy { margin-top: 15px; }
 .symbol-list { margin: 15px 0 0; display: grid; gap: 12px; }
 .symbol-list > div { display: grid; grid-template-columns: 75px 1fr; gap: 10px; font-size: 11px; line-height: 1.7; }
@@ -389,7 +389,7 @@ button:disabled:not(.primary):not(.nav-item) { opacity: .5; }
   .dialog-body { padding-left: 20px; padding-right: 20px; }
   .dialog-footer { padding: 13px 20px; }
   .dialog-footer .primary { font-size: 10px; gap: 6px; padding-left: 9px; padding-right: 9px; }
-  .lecture-steps li { padding-left: 29px; }
+  .construction-steps li { padding-left: 29px; }
   .symbol-list > div { grid-template-columns: 65px 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -413,9 +413,9 @@ input:not([type=checkbox]):not([type=radio]),select{font-size:14px}.stepper{max-
 .summary-includes b{font-size:12px}.summary-includes small{font-size:10px;color:#65735e}.print-tip p,.print-tip b{font-size:10px;color:#5d714c}.paper-badge{font-size:10px;color:#576e42}.summary-includes>div{padding:7px 0}.include-icon{width:28px;height:30px}
 .result-title p{font-size:12px}.set-code>span{font-size:11px;color:#65735e}.set-code code{font-size:13px}.set-code .reuse{color:#65735e}.file-group h3{font-size:14px}.file-group-heading>span{font-size:9px;color:#57733e}.teacher-group .file-group-heading>span{color:#866528}
 .file-name{font-size:13px}.file-row p{font-size:11px;color:#65735e}.small-open{font-size:10px;color:#5d7646}.file-type{font-size:9px;color:#617c48}.result-bottom{font-size:10px;color:#65735e}.result-notice{font-size:12px}
-.guide-banner h2{font-size:14px}.guide-banner p{font-size:12px;color:#637750}.secondary{font-size:12px;color:#526c3d}.dialog-intro{font-size:12px;color:#65735e}.lecture-steps b{font-size:14px}.lecture-steps small{font-size:11px;color:#65735e}.lecture-steps p,.help-copy p{font-size:13px;color:#65735e}.help-section summary{font-size:14px}.symbol-list>div{font-size:13px}.symbol-list dd{color:#65735e}.dialog-footer .primary{font-size:12px}
+.guide-banner h2{font-size:14px}.guide-banner p{font-size:12px;color:#637750}.secondary{font-size:12px;color:#526c3d}.dialog-intro{font-size:12px;color:#65735e}.construction-steps b{font-size:14px}.construction-steps small{font-size:11px;color:#65735e}.construction-steps p,.help-copy p{font-size:13px;color:#65735e}.help-section summary{font-size:14px}.symbol-list>div{font-size:13px}.symbol-list dd{color:#65735e}.dialog-footer .primary{font-size:12px}
 @media(max-width:1180px){.section-heading h2{font-size:15px}.task-card b{font-size:13px}.task-card>span{font-size:11px}.summary-includes b{font-size:11px}.summary-includes small{font-size:9px}.summary-stats span{font-size:9px}}
 @media(max-width:860px){.summary-stats span{font-size:11px}.page-header p{font-size:13px}.task-card b{font-size:14px}.task-card>span{font-size:12px}.task-card small{font-size:11px}}
-@media(max-width:540px){.section-heading h2{font-size:14px}.page-header p{font-size:12px}.breadcrumb{font-size:9px}.workflow-step{font-size:10px}.task-card b{font-size:12px}.task-card>span{font-size:11px}.task-card small{font-size:9px}.mode-card b{font-size:12px}.mode-card small{font-size:11px}.mode-card em{font-size:8px}.mode-pages{font-size:9px}.generation-note{font-size:11px}.generate-caption{font-size:9px}.guide-banner>.guide-banner-icon{display:none}.guide-banner>div{flex-basis:100%}.guide-banner .secondary{margin-left:0}.guide-banner h2{font-size:13px}.guide-banner p{font-size:12px}.advanced summary{font-size:11px}.advanced summary span{font-size:10px}.summary-stats span{font-size:10px}.file-name{font-size:12px}.file-row p{font-size:10px}.result-title p{font-size:11px}.symbol-list>div{font-size:12px}.lecture-steps p,.help-copy p{font-size:12px}}
+@media(max-width:540px){.section-heading h2{font-size:14px}.page-header p{font-size:12px}.breadcrumb{font-size:9px}.workflow-step{font-size:10px}.task-card b{font-size:12px}.task-card>span{font-size:11px}.task-card small{font-size:9px}.mode-card b{font-size:12px}.mode-card small{font-size:11px}.mode-card em{font-size:8px}.mode-pages{font-size:9px}.generation-note{font-size:11px}.generate-caption{font-size:9px}.guide-banner>.guide-banner-icon{display:none}.guide-banner>div{flex-basis:100%}.guide-banner .secondary{margin-left:0}.guide-banner h2{font-size:13px}.guide-banner p{font-size:12px}.advanced summary{font-size:11px}.advanced summary span{font-size:10px}.summary-stats span{font-size:10px}.file-name{font-size:12px}.file-row p{font-size:10px}.result-title p{font-size:11px}.symbol-list>div{font-size:12px}.construction-steps p,.help-copy p{font-size:12px}}
 
 .summary-generate{width:100%;justify-content:space-between;font-size:12px;min-height:43px;margin-top:17px}.summary-generate .icon{width:16px;height:16px}.task-card:has(input[aria-invalid=true]){border-color:#bd8173;background:#fff9f6}@media(max-width:860px){.summary-generate{margin-top:15px;min-height:42px}}

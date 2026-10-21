@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "1.3.0"
+const version = "1.3.1"
 
 type app struct {
 	mu       sync.RWMutex
