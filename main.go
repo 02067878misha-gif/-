@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "1.3.1"
+const version = "1.4.0"
 
 type app struct {
 	mu       sync.RWMutex
@@ -203,6 +203,7 @@ func main() {
 	flag.IntVar(&c.Step, "step", c.Step, "Шаг углов (1, 5, 10)")
 	tasks := flag.String("tasks", strings.Join(c.Tasks, ","), "Типы: plane,line,rake,fold")
 	flag.StringVar(&c.Title, "title", c.Title, "Заголовок")
+	flag.BoolVar(&c.ColorsEnabled, "colors", false, "Цветные элементы и подписи цветов для студентов")
 	noBrowser := flag.Bool("no-browser", false, "Не открывать браузер")
 	versionFlag := flag.Bool("version", false, "Версия")
 	flag.Parse()

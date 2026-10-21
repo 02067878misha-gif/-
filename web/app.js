@@ -7,6 +7,15 @@ const resultEl = $('#result');
 const dialog = $('#help-dialog');
 const generateButton = $('#generate');
 const taskInputs = [...form.querySelectorAll('[name=task]')];
+const colorInputs = [...form.querySelectorAll('[data-color-key]')];
+const palette = [
+  ['синий', '#2457a7', 'синим'], ['красный', '#c23632', 'красным'],
+  ['зелёный', '#18784a', 'зелёным'], ['фиолетовый', '#7541a0', 'фиолетовым'],
+  ['оранжевый', '#a54c13', 'оранжевым'], ['бирюзовый', '#087c8c', 'бирюзовым'],
+  ['коричневый', '#864a2b', 'коричневым'], ['розовый', '#ad286b', 'розовым'],
+  ['чёрный', '#0f0f0f', 'чёрным'], ['серый', '#656565', 'серым'],
+];
+const normalizedColor = name => name.trim().toLowerCase().replaceAll('ё', 'е');
 let busy = false;
 let lastSet = null;
 let previewMode = 'forward';
@@ -25,6 +34,10 @@ function readConfig() {
     mode: fields.namedItem('mode').value,
     seed: fields.namedItem('seed').value.trim(),
     tasks: taskInputs.filter(el => el.checked).map(el => el.value),
+    colors_enabled: $('#colors-enabled').checked,
+    element_colors: Object.fromEntries(colorInputs.map(el => [el.dataset.colorKey, {
+      hex: el.value, name: $(`#color-name-${el.dataset.colorKey}`).value.trim() || $(`#color-name-${el.dataset.colorKey}`).defaultValue,
+    }])),
   };
 }
 function setStatus(message = '', error = false) {
@@ -32,11 +45,36 @@ function setStatus(message = '', error = false) {
   statusEl.textContent = message;
 }
 function clearErrors() {
-  for (const name of ['count', 'tasks']) {
+  for (const name of ['count', 'tasks', 'colors']) {
     const el = $(`#${name}-error`); el.textContent = ''; el.hidden = true;
   }
   fields.namedItem('count').removeAttribute('aria-invalid');
   taskInputs.forEach(el => el.removeAttribute('aria-invalid'));
+  document.querySelectorAll('[data-color-name]').forEach(el => el.removeAttribute('aria-invalid'));
+}
+function updateColors(c) {
+  $('#color-palette').hidden = !c.colors_enabled;
+  const keys = [];
+  document.querySelectorAll('[data-color-task]').forEach(group => {
+    group.hidden = !c.tasks.includes(group.dataset.colorTask);
+    if (!group.hidden) group.querySelectorAll('[data-color-key]').forEach(el => keys.push(el.dataset.colorKey));
+  });
+  const summary = $('#color-summary');
+  summary.hidden = !c.colors_enabled || !keys.length;
+  summary.replaceChildren(...keys.map(key => {
+    const chip = document.createElement('span');
+    const swatch = document.createElement('i'); swatch.style.backgroundColor = c.element_colors[key].hex;
+    const name = document.createElement('span');
+    const label = key === 'pi' ? 'π' : key.replace('OP', 'ОП');
+    name.textContent = `${label} — ${c.element_colors[key].name || 'укажите цвет'}`;
+    chip.append(swatch, name); return chip;
+  }));
+  document.querySelectorAll('.net-overlay [data-plot]').forEach(group => {
+    const key = group.querySelector('text')?.textContent;
+    const color = c.colors_enabled ? c.element_colors[key]?.hex : '#0f0f0f';
+    group.querySelectorAll('path').forEach(el => { el.style.stroke = color; });
+    group.querySelectorAll('circle, text').forEach(el => { el.style.fill = color; });
+  });
 }
 function updatePreview(c) {
   if (c.mode !== 'both') previewMode = c.mode;
@@ -76,6 +114,7 @@ function updateSummary() {
   if (validCount) { $('#count-error').hidden = true; fields.namedItem('count').removeAttribute('aria-invalid'); }
   if (c.tasks.length) { $('#tasks-error').hidden = true; taskInputs.forEach(el => el.removeAttribute('aria-invalid')); }
   updatePreview(c);
+  updateColors(c);
 }
 function focusSection(selector) {
   const el = $(selector);
@@ -109,11 +148,34 @@ function validate(c) {
     $('#tasks-error').textContent = 'Выберите хотя бы один элемент для построения.'; $('#tasks-error').hidden = false;
     taskInputs.forEach(el => el.setAttribute('aria-invalid', 'true')); target ??= taskInputs[0];
   }
+  if (c.colors_enabled) {
+    for (const el of document.querySelectorAll('[data-color-name]')) {
+      if (el.closest('[data-color-task]').hidden) continue;
+      const name = el.value.trim();
+      if ([...name].length < 1 || [...name].length > 12 || /[\u0000-\u001f\u007f-\u009f]/u.test(name)) {
+        $('#colors-error').textContent = 'Укажите названия цветов: от 1 до 12 символов, без переносов строк.';
+        $('#colors-error').hidden = false; el.setAttribute('aria-invalid', 'true');
+        target ??= el;
+      }
+    }
+  }
   if (target) { target.focus(); setStatus('Проверьте выделенные настройки перед созданием PDF.', true); return false; }
   return true;
 }
 form.addEventListener('input', updateSummary);
 form.addEventListener('change', updateSummary);
+for (const input of colorInputs) {
+  const nameInput = $(`#color-name-${input.dataset.colorKey}`);
+  input.addEventListener('input', () => {
+    nameInput.value = palette.find(color => color[1] === input.value)?.[0] || input.value;
+    updateSummary();
+  });
+  nameInput.addEventListener('input', () => {
+    const color = palette.find(color => [color[0], color[2]].some(name => normalizedColor(name) === normalizedColor(nameInput.value)));
+    if (color) input.value = color[1];
+    updateSummary();
+  });
+}
 for (const button of document.querySelectorAll('[data-count]')) {
   button.addEventListener('click', () => { fields.namedItem('count').value = button.dataset.count; updateSummary(); });
 }
@@ -183,6 +245,11 @@ $('#reuse-settings').addEventListener('click', () => {
   fields.namedItem('title').value = c.title; fields.namedItem('count').value = c.count;
   fields.namedItem('step').value = c.step; fields.namedItem('mode').value = c.mode; fields.namedItem('seed').value = c.seed;
   taskInputs.forEach(el => { el.checked = c.tasks.includes(el.value); });
+  $('#colors-enabled').checked = c.colors_enabled;
+  colorInputs.forEach(el => {
+    el.value = c.element_colors[el.dataset.colorKey].hex;
+    $(`#color-name-${el.dataset.colorKey}`).value = c.element_colors[el.dataset.colorKey].name;
+  });
   $('#seed-options').open = true; clearErrors(); updateSummary(); navState('create');
   focusSection('#settings');
   setStatus('Настройки и код этого набора восстановлены. Нажмите «Создать комплект PDF», чтобы повторить его.');

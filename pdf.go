@@ -91,7 +91,7 @@ func grid(p *gofpdf.Fpdf, cx, cy, r float64) {
 		}
 	}
 }
-func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int) {
+func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int, color ElementColor) {
 	pts := greatCircle(pl)
 	path := func() {
 		p.MoveTo(cx+r*pts[0].X, cy+r*pts[0].Y)
@@ -105,14 +105,13 @@ func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int) {
 	p.SetDrawColor(255, 255, 255)
 	p.SetLineWidth(1.05)
 	path()
-	p.SetDrawColor(15, 15, 15)
+	p.SetDrawColor(color.rgb())
 	p.SetLineWidth(.65)
 	switch style {
 	case 1:
 		p.SetDashPattern([]float64{2, 1}, 0)
 	case 5:
 		p.SetDashPattern([]float64{.5, .8}, 0)
-		p.SetDrawColor(90, 90, 90)
 		p.SetLineWidth(.45)
 	case 3:
 		p.SetDashPattern([]float64{4, 1.5}, 0)
@@ -127,10 +126,10 @@ func curve(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, style int) {
 	path()
 	p.SetDashPattern(nil, 0)
 }
-func marker(p *gofpdf.Fpdf, l Line, cx, cy, r float64, label string, kind int) {
+func marker(p *gofpdf.Fpdf, l Line, cx, cy, r float64, label string, kind int, color ElementColor) {
 	v := project(l.Vec())
 	x, y := cx+r*v.X, cy+r*v.Y
-	p.SetDrawColor(0, 0, 0)
+	p.SetDrawColor(color.rgb())
 	p.SetFillColor(255, 255, 255)
 	p.SetLineWidth(.5)
 	switch kind {
@@ -143,16 +142,17 @@ func marker(p *gofpdf.Fpdf, l Line, cx, cy, r float64, label string, kind int) {
 		p.Polygon([]gofpdf.PointType{{X: x, Y: y - 1.7}, {X: x + 1.7, Y: y}, {X: x, Y: y + 1.7}, {X: x - 1.7, Y: y}}, "DF")
 	default:
 		p.Circle(x, y, 1.25, "DF")
-		p.SetFillColor(0, 0, 0)
+		p.SetFillColor(color.rgb())
 		p.Circle(x, y, .45, "F")
 	}
 	setFont(p, 8)
 	w := p.GetStringWidth(label)
 	p.SetFillColor(255, 255, 255)
 	p.Rect(x+1.8, y-3.8, w+1, 4, "F")
+	p.SetTextColor(color.rgb())
 	p.Text(x+2.2, y-.5, label)
 }
-func curveLabel(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, label string) {
+func curveLabel(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, label string, color ElementColor) {
 	l := pl.DipLine()
 	v := project(l)
 	x, y := cx+r*v.X, cy+r*v.Y
@@ -160,6 +160,7 @@ func curveLabel(p *gofpdf.Fpdf, pl Plane, cx, cy, r float64, label string) {
 	w := p.GetStringWidth(label)
 	p.SetFillColor(255, 255, 255)
 	p.Rect(x+1, y-4, w+1, 4, "F")
+	p.SetTextColor(color.rgb())
 	p.Text(x+1.5, y-1, label)
 }
 
@@ -243,41 +244,41 @@ func drawElements(p *gofpdf.Fpdf, c Config, v Elements, cx, cy, r float64, teach
 	for _, task := range c.Tasks {
 		switch task {
 		case "plane":
-			curve(p, v.Plane, cx, cy, r, 0)
+			curve(p, v.Plane, cx, cy, r, 0, c.elementColor("P"))
 		case "rake":
-			curve(p, v.RakePlane, cx, cy, r, 1)
+			curve(p, v.RakePlane, cx, cy, r, 1, c.elementColor("R"))
 		case "fold":
-			curve(p, v.Wing1, cx, cy, r, 3)
-			curve(p, v.Wing2, cx, cy, r, 4)
+			curve(p, v.Wing1, cx, cy, r, 3, c.elementColor("K1"))
+			curve(p, v.Wing2, cx, cy, r, 4, c.elementColor("K2"))
 			if teacher {
-				curve(p, v.Fold.SectionPlane, cx, cy, r, 5)
-				curve(p, v.Fold.Bisector1, cx, cy, r, 2)
-				curve(p, v.Fold.Bisector2, cx, cy, r, 2)
+				curve(p, v.Fold.SectionPlane, cx, cy, r, 5, c.elementColor("pi"))
+				curve(p, v.Fold.Bisector1, cx, cy, r, 2, c.elementColor("OP1"))
+				curve(p, v.Fold.Bisector2, cx, cy, r, 2, c.elementColor("OP2"))
 			}
 		}
 	}
 	for _, task := range c.Tasks {
 		switch task {
 		case "plane":
-			curveLabel(p, v.Plane, cx, cy, r, "P")
+			curveLabel(p, v.Plane, cx, cy, r, "P", c.elementColor("P"))
 			if teacher {
-				marker(p, lineFromVec(v.Plane.Pole()), cx, cy, r, "Np", 1)
+				marker(p, lineFromVec(v.Plane.Pole()), cx, cy, r, "Np", 1, c.elementColor("Np"))
 			}
 		case "line":
-			marker(p, v.Line, cx, cy, r, "L", 0)
+			marker(p, v.Line, cx, cy, r, "L", 0, c.elementColor("L"))
 		case "rake":
-			curveLabel(p, v.RakePlane, cx, cy, r, "R")
-			marker(p, v.RakeLine, cx, cy, r, "Lr", 3)
+			curveLabel(p, v.RakePlane, cx, cy, r, "R", c.elementColor("R"))
+			marker(p, v.RakeLine, cx, cy, r, "Lr", 3, c.elementColor("Lr"))
 		case "fold":
-			curveLabel(p, v.Wing1, cx, cy, r, "K1")
-			curveLabel(p, v.Wing2, cx, cy, r, "K2")
+			curveLabel(p, v.Wing1, cx, cy, r, "K1", c.elementColor("K1"))
+			curveLabel(p, v.Wing2, cx, cy, r, "K2", c.elementColor("K2"))
 			if teacher {
-				curveLabel(p, v.Fold.SectionPlane, cx, cy, r, "π")
-				curveLabel(p, v.Fold.Bisector1, cx, cy, r, "ОП1")
-				curveLabel(p, v.Fold.Bisector2, cx, cy, r, "ОП2")
-				marker(p, v.Fold.Section1, cx, cy, r, "A", 0)
-				marker(p, v.Fold.Section2, cx, cy, r, "B", 0)
-				marker(p, v.Fold.Hinge, cx, cy, r, "H", 2)
+				curveLabel(p, v.Fold.SectionPlane, cx, cy, r, "π", c.elementColor("pi"))
+				curveLabel(p, v.Fold.Bisector1, cx, cy, r, "ОП1", c.elementColor("OP1"))
+				curveLabel(p, v.Fold.Bisector2, cx, cy, r, "ОП2", c.elementColor("OP2"))
+				marker(p, v.Fold.Section1, cx, cy, r, "A", 0, c.elementColor("A"))
+				marker(p, v.Fold.Section2, cx, cy, r, "B", 0, c.elementColor("B"))
+				marker(p, v.Fold.Hinge, cx, cy, r, "H", 2, c.elementColor("H"))
 			}
 		}
 	}
@@ -327,19 +328,38 @@ func makePDF(c Config, variants []Variant, teacher bool) ([]byte, error) {
 			textAt(p, 12, 30, instruction, 7.5)
 			p.SetDrawColor(160, 170, 160)
 			p.SetLineWidth(.15)
+			rowStart, rowHeight, promptSize, promptLineHeight, netY := 34., 8.5, 7.2, 3.4, 166.
+			if c.ColorsEnabled {
+				rowStart, rowHeight, promptSize, promptLineHeight, netY = 32, 7.5, 6.8, 3.1, 168
+			}
 			for i, task := range c.Tasks {
-				y := 34 + 8.5*float64(i)
+				y := rowStart + rowHeight*float64(i)
 				p.Line(12, y, 198, y)
 				textAt(p, 12, y+3.8, elementLabel(task), 7.5)
-				setFont(p, 7.2)
+				setFont(p, promptSize)
 				p.SetXY(47, y+.7)
-				p.MultiCell(151, 3.4, prompt(task, mode, v), "", "L", false)
+				p.MultiCell(151, promptLineHeight, prompt(task, mode, v), "", "L", false)
 			}
-			grid(p, 105, 166, 90)
+			if c.ColorsEnabled {
+				legend := c.colorLegend()
+				legendSize := 6.4
+				setFont(p, legendSize)
+				for len(p.SplitText(legend, 186)) > 3 && legendSize > 6 {
+					legendSize -= .2
+					setFont(p, legendSize)
+				}
+				p.SetXY(12, 63)
+				p.MultiCell(186, 3, legend, "", "L", false)
+			}
+			grid(p, 105, netY, 90)
 			if mode == "inverse" || teacher {
-				drawElements(p, c, v, 105, 166, 90, teacher)
+				drawElements(p, c, v, 105, netY, 90, teacher)
 			}
-			textAt(p, 12, 265, "Ответы: азимут/угол, в градусах. Для плоскости — падение, для линии — погружение.", 7)
+			answerHeadingY := 265.
+			if c.ColorsEnabled {
+				answerHeadingY = 266.2
+			}
+			textAt(p, 12, answerHeadingY, "Ответы: азимут/угол, в градусах. Для плоскости — падение, для линии — погружение.", 7)
 			y := 267.
 			for _, task := range c.Tasks {
 				text := blankAnswer(task)
@@ -454,7 +474,11 @@ func buildFiles(c Config) (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map[string][]byte{"students.pdf": student, "teacher.pdf": teacher, "answers.csv": makeCSV(c, vs), "settings.json": j, "PRINT_README.txt": []byte(printReadme), "student_guide.pdf": guide}, nil
+	instructions := printReadme
+	if c.ColorsEnabled {
+		instructions += "\nЦветовое оформление: выполняйте построения цветами, указанными на листе.\n" + c.colorLegend() + "\nНа чёрно-белой распечатке используйте названия цветов в условии.\n"
+	}
+	return map[string][]byte{"students.pdf": student, "teacher.pdf": teacher, "answers.csv": makeCSV(c, vs), "settings.json": j, "PRINT_README.txt": []byte(instructions), "student_guide.pdf": guide}, nil
 }
 func zipFiles(files map[string][]byte) ([]byte, error) {
 	var b bytes.Buffer

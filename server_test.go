@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,8 @@ func TestGenerateAndDownload(t *testing.T) {
 	c := defaultConfig()
 	c.Count = 1
 	c.Seed = "http-check"
+	c.ColorsEnabled = true
+	c.ElementColors = map[string]ElementColor{"P": {"#123ABC", "мой синий"}}
 	body, _ := json.Marshal(c)
 	req := httptest.NewRequest("POST", "http://localhost/test-token/generate", bytes.NewReader(body))
 	r := httptest.NewRecorder()
@@ -62,6 +65,20 @@ func TestGenerateAndDownload(t *testing.T) {
 	}
 	if get("/test-token/download/old/students.pdf").Code != 404 {
 		t.Fatal("stale job accepted")
+	}
+	settings := get("/test-token/download/" + result.Job + "/settings.json")
+	var saved struct {
+		Config Config `json:"config"`
+	}
+	if err := json.Unmarshal(settings.Body.Bytes(), &saved); err != nil {
+		t.Fatal(err)
+	}
+	if !saved.Config.ColorsEnabled || saved.Config.ElementColors["P"] != (ElementColor{"#123abc", "мой синий"}) {
+		t.Fatal("Downloaded settings lost the selected colors")
+	}
+	instructions := get("/test-token/download/" + result.Job + "/PRINT_README.txt")
+	if !strings.Contains(instructions.Body.String(), "P — мой синий") {
+		t.Fatal("Student color instructions missing")
 	}
 	if get("/generate").Code != 404 {
 		t.Fatal("missing session token accepted")

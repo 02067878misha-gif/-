@@ -12,12 +12,14 @@ import (
 )
 
 type Config struct {
-	Count int      `json:"count"`
-	Seed  string   `json:"seed"`
-	Mode  string   `json:"mode"`
-	Step  int      `json:"step"`
-	Tasks []string `json:"tasks"`
-	Title string   `json:"title"`
+	Count         int                     `json:"count"`
+	Seed          string                  `json:"seed"`
+	Mode          string                  `json:"mode"`
+	Step          int                     `json:"step"`
+	Tasks         []string                `json:"tasks"`
+	Title         string                  `json:"title"`
+	ColorsEnabled bool                    `json:"colors_enabled"`
+	ElementColors map[string]ElementColor `json:"element_colors,omitempty"`
 }
 type Elements struct {
 	Plane     Plane      `json:"plane"`
@@ -85,7 +87,7 @@ func (c *Config) Validate() error {
 		}
 		c.Seed = hex.EncodeToString(b[:])
 	}
-	return nil
+	return c.validateColors()
 }
 func generate(c Config) []Variant {
 	rng := func(domain string) *mathrand.Rand {

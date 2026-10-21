@@ -105,7 +105,7 @@ def prepare(destination, go, repo=ROOT):
             run([go, 'build', '-mod=readonly', '-trimpath', '-ldflags=-s -w -H=windowsgui', '-o', exe, '.'],
                 cwd=repo, env=windows_env)
             examples = work / 'examples'
-            run([native, '--generate', '--count', '2', '--seed', 'WULFF-2026', '--out', examples], cwd=repo)
+            run([native, '--generate', '--count', '2', '--seed', 'WULFF-2026', '--colors', '--out', examples], cwd=repo)
             source = work / f'WulffGenerator_source_v{v}.zip'
             make_source_zip(source, repo)
             archive = destination / f'WulffGenerator_Windows_x64_v{v}.zip'
