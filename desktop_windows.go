@@ -129,7 +129,7 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 							d.Label{Text: "Название на листах", Row: 0, Column: 0},
 							d.LineEdit{AssignTo: &ui.title, Row: 0, Column: 1, MaxLength: 70, OnTextChanged: ui.update},
 							d.Label{Text: "Вариантов (1–20)", Row: 1, Column: 0},
-							d.NumberEdit{AssignTo: &ui.count, Row: 1, Column: 1, MinValue: 1, MaxValue: 20, Decimals: 0, Value: 20, SpinButtonsVisible: true, OnValueChanged: ui.update},
+							d.NumberEdit{AssignTo: &ui.count, Row: 1, Column: 1, MinValue: 1, MaxValue: 20, Decimals: 0, Value: float64(20), SpinButtonsVisible: true, OnValueChanged: ui.update},
 							d.Label{Text: "Шаг исходных углов", Row: 2, Column: 0},
 							d.ComboBox{AssignTo: &ui.step, Row: 2, Column: 1, Model: []string{"5° — стандартный", "10° — крупный", "1° — точный"}, CurrentIndex: 0, OnCurrentIndexChanged: ui.update},
 							d.Label{Text: "Типы задач", Row: 3, Column: 0},
