@@ -115,7 +115,7 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 	}
 	colorWidgets = append(colorWidgets, d.TextLabel{Text: "Метки и типы линий сохраняются при чёрно-белой печати. Цветной режим можно выключить, сохранив настроенные оттенки.", MinSize: d.Size{Width: 300}, TextColor: muted}, d.VSpacer{})
 	definitions := d.MainWindow{
-		AssignTo: &ui.window, Title: "Сетка Вульфа · " + version, Size: d.Size{Width: 1120, Height: 850}, MinSize: d.Size{Width: 940, Height: 700},
+		AssignTo: &ui.window, Title: "Сетка Вульфа · " + version, Size: d.Size{Width: 1120, Height: 800}, MinSize: d.Size{Width: 940, Height: 520},
 		Font: d.Font{Family: "Segoe UI", PointSize: 10}, Background: d.SolidColorBrush{Color: walk.RGB(246, 248, 243)},
 		Layout: d.VBox{Margins: d.Margins{Left: 22, Top: 18, Right: 22, Bottom: 16}, Spacing: 12},
 		Children: []d.Widget{
@@ -123,7 +123,7 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 			d.Label{Text: "Задания студентам и готовые ответы преподавателю · работает без интернета", TextColor: muted},
 			d.Composite{Layout: d.HBox{MarginsZero: true, Spacing: 16}, StretchFactor: 1, Children: []d.Widget{
 				d.TabWidget{AssignTo: &ui.tabs, StretchFactor: 1, Pages: []d.TabPage{
-					{Title: "Параметры работы", Layout: d.VBox{Margins: d.Margins{Left: 16, Top: 14, Right: 16, Bottom: 14}, Spacing: 12}, Children: []d.Widget{
+					{Title: "Параметры работы", Layout: d.VBox{MarginsZero: true}, Children: []d.Widget{d.ScrollView{HorizontalFixed: true, Layout: d.VBox{Margins: d.Margins{Left: 16, Top: 14, Right: 16, Bottom: 14}, Spacing: 12}, Children: []d.Widget{
 						d.Label{Text: "Новый комплект заданий", Font: sectionFont, TextColor: green},
 						d.GroupBox{Title: "Параметры", Layout: d.Grid{Columns: 2, Spacing: 10}, Children: []d.Widget{
 							d.Label{Text: "Название на листах", Row: 0, Column: 0},
@@ -141,14 +141,14 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 							d.LineEdit{AssignTo: &ui.seed, MaxLength: 48, CueBanner: "Пусто — новые случайные значения", OnTextChanged: ui.update},
 							d.TextLabel{Text: "Тот же код, шаг и состав заданий повторяют значения. Цвета можно изменить отдельно.", MinSize: d.Size{Width: 300}, TextColor: muted},
 						}}, d.VSpacer{},
-					}},
+					}}}},
 					{Title: "Цвета элементов", Layout: d.VBox{MarginsZero: true}, Children: []d.Widget{d.ScrollView{Layout: d.VBox{Spacing: 10}, HorizontalFixed: true, Children: colorWidgets}}},
 					{Title: "Памятка", Layout: d.VBox{Spacing: 10}, Children: []d.Widget{
 						d.TextEdit{AssignTo: &ui.help, ReadOnly: true, VScroll: true, Text: desktopHelpText, StretchFactor: 1},
 						d.PushButton{Text: "Открыть печатную памятку PDF", OnClicked: ui.openGuide},
 					}},
 				}},
-				d.Composite{MinSize: d.Size{Width: 270}, MaxSize: d.Size{Width: 300}, Layout: d.VBox{Margins: d.Margins{Left: 12, Top: 12, Right: 12, Bottom: 12}, Spacing: 10}, Background: d.SolidColorBrush{Color: walk.RGB(255, 255, 255)}, Children: []d.Widget{
+				d.ScrollView{HorizontalFixed: true, MinSize: d.Size{Width: 270}, MaxSize: d.Size{Width: 300}, Layout: d.VBox{Margins: d.Margins{Left: 12, Top: 12, Right: 12, Bottom: 12}, Spacing: 10}, Background: d.SolidColorBrush{Color: walk.RGB(255, 255, 255)}, Children: []d.Widget{
 					d.Label{Text: "Ваш комплект", Font: sectionFont, TextColor: green},
 					d.ImageView{Image: ui.net, Mode: d.ImageViewModeShrink, MinSize: d.Size{Width: 210, Height: 210}, MaxSize: d.Size{Width: 250, Height: 250}, ToolTipText: "Схема сетки. Готовые построения — в созданных PDF."},
 					d.TextLabel{AssignTo: &ui.summary, MinSize: d.Size{Width: 230}, TextColor: green},
@@ -211,6 +211,17 @@ func newDesktopWindow(c Config, output string) (*desktopWindow, error) {
 	})
 	ui.ready = true
 	ui.applyConfig(c)
+	monitor := win.MONITORINFO{}
+	monitor.CbSize = uint32(unsafe.Sizeof(monitor))
+	if win.GetMonitorInfo(win.MonitorFromWindow(ui.window.Handle(), win.MONITOR_DEFAULTTONEAREST), &monitor) {
+		work := monitor.RcWork
+		bounds := ui.window.BoundsPixels()
+		bounds.Width = min(bounds.Width, int(work.Right-work.Left))
+		bounds.Height = min(bounds.Height, int(work.Bottom-work.Top))
+		bounds.X = int(work.Left) + (int(work.Right-work.Left)-bounds.Width)/2
+		bounds.Y = int(work.Top) + (int(work.Bottom-work.Top)-bounds.Height)/2
+		ui.window.SetBoundsPixels(bounds)
+	}
 	return ui, nil
 }
 

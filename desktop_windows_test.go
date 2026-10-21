@@ -76,7 +76,16 @@ func TestNativeDesktopWindowAndGeneration(t *testing.T) {
 		ui.window.Synchronize(func() {
 			snapshot("native-colors")
 			ui.tabs.SetCurrentIndex(0)
-			ui.startGeneration()
+			ui.window.SetSize(walk.Size{Width: 940, Height: 640})
+			ui.window.Synchronize(func() {
+				snapshot("native-small-window")
+				button := ui.generateButton.BoundsPixels()
+				parent := ui.generateButton.Parent().ClientBoundsPixels()
+				if button.X < 0 || button.Y < 0 || button.X+button.Width > parent.Width || button.Y+button.Height > parent.Height {
+					t.Error("Generation button clipped in the smaller window")
+				}
+				ui.startGeneration()
+			})
 		})
 	})
 	finished := false
