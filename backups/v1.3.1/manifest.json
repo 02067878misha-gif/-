@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "version": "1.3.1",
+  "tag": "v1.3.1",
+  "archive": "WulffGenerator_Windows_x64_v1.3.1.zip",
+  "sha256": "2ce9f4ea8ac11d4a4ce8cf29d7720e98d42c7b56c24869fbf561622307c73ef0",
+  "source_commit": "6e93a2a86613031ba501c2d63e450a0770196fb1",
+  "source_zip_sha256": "db35c9c984e768cedfa04a38fc099daff46382f7fe96b11c22b1ff00348bc00a",
+  "go_version": "go version go1.27.3 linux/amd64"
+}
