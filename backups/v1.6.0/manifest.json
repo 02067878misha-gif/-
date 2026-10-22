@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "version": "1.6.0",
+  "tag": "v1.6.0",
+  "archive": "GeoMap_Wulff_Windows_x64_v1.6.0.zip",
+  "product": "GeoMap + \u0421\u0435\u0442\u043a\u0430 \u0412\u0443\u043b\u044c\u0444\u0430",
+  "executable": "GeoMap_Wulff.exe",
+  "sha256": "22dc6e6c440afcee6d5e5b2aa18db695ce244f6ef8e4d15641c08900f2b292ee",
+  "source_commit": "617f93a11c72d2145c777f535bf9cf7f0393bfee",
+  "source_zip_sha256": "3d5525a6d04f6d1c88c7d411367cb5aa8c292a48089192d27e12491d1ba35cd1",
+  "go_version": "go version go1.27.3 linux/amd64"
+}
