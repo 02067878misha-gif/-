@@ -24,13 +24,15 @@ def main():
             continue
         with tempfile.TemporaryDirectory(prefix='wulff-notes-') as temp:
             notes = Path(temp) / 'notes.md'
-            notes.write_text(f"Сетка Вульфа {meta['tag']} для Windows x64.\n\n"
-                             'Распакуйте ZIP и запустите `WulffGenerator.exe`. В архиве также '
+            product = meta.get('product', 'Сетка Вульфа')
+            executable = meta.get('executable', 'WulffGenerator.exe')
+            notes.write_text(f"{product} {meta['tag']} для Windows x64.\n\n"
+                             f'Распакуйте ZIP и запустите `{executable}`. В архиве также '
                              'исходный код, инструкция, примеры заданий и ответы преподавателю.\n\n'
                              'Этот архив сохранён в Git вместе с контрольной суммой SHA-256. '
                              'Предыдущие версии не заменяются.\n')
             subprocess.run(['gh', 'release', 'create', meta['tag'], '--repo', args.repo,
-                            '--verify-tag', '--title', 'Сетка Вульфа ' + meta['tag'],
+                            '--verify-tag', '--title', product + ' ' + meta['tag'],
                             '--notes-file', str(notes), str(folder / meta['archive']),
                             str(folder / 'SHA256SUMS.txt')], cwd=ROOT, check=True)
 

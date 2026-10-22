@@ -31,7 +31,7 @@ jobs:
       - name: Vet Windows code
         run: go vet ./...
       - name: Build standalone Windows program
-        run: go build -trimpath -ldflags '-s -w -H=windowsgui' -o dist/WulffGenerator.exe .
+        run: go build -trimpath -ldflags '-s -w -H=windowsgui' -o dist/GeoMap_Wulff.exe .
       - name: Keep Windows screenshots and executable
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,5 +39,5 @@ jobs:
           name: windows-desktop
           path: |
             dist/native-screenshots/*.png
-            dist/WulffGenerator.exe
+            dist/GeoMap_Wulff.exe
             dist/native-test.log

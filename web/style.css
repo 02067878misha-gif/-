@@ -440,3 +440,5 @@ input:not([type=checkbox]):not([type=radio]),select{font-size:14px}.stepper{max-
 .color-summary > span { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: #526b43; }
 .color-summary i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #0002; flex-shrink: 0; }
 @media (max-width:540px) { .color-groups { grid-template-columns: 1fr; } .color-group[data-color-task=fold] { grid-template-columns: 1fr; } .color-row > label { font-size: 12px; } }
+
+.is-embedded #quit { display: none; }

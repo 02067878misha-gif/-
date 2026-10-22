@@ -14,6 +14,8 @@ import tempfile
 from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
+PROGRAM_EXE = 'GeoMap_Wulff.exe'
+PRODUCT = 'GeoMap + Сетка Вульфа'
 
 
 def run(args, *, cwd=ROOT, env=None, capture=False):
@@ -55,7 +57,10 @@ def verify_backup(folder):
     with ZipFile(archive) as z:
         if z.testzip() is not None:
             raise RuntimeError(f'Corrupt ZIP: {archive}')
-        if 'WulffGenerator.exe' not in z.namelist():
+        executable = meta.get('executable', 'WulffGenerator.exe')
+        if Path(executable).name != executable or not executable.endswith('.exe'):
+            raise RuntimeError('Invalid executable filename')
+        if executable not in z.namelist():
             raise RuntimeError(f'EXE missing from backup: {archive}')
         if 'source_zip_sha256' in meta:
             sources = [name for name in z.namelist()
@@ -100,7 +105,7 @@ def prepare(destination, go, repo=ROOT):
             for key in ['GOOS', 'GOARCH']:
                 native_env.pop(key, None)
             run([go, 'build', '-mod=readonly', '-trimpath', '-o', native, '.'], cwd=repo, env=native_env)
-            exe = work / 'WulffGenerator.exe'
+            exe = work / PROGRAM_EXE
             windows_env = dict(os.environ, GOOS='windows', GOARCH='amd64', CGO_ENABLED='0')
             run([go, 'build', '-mod=readonly', '-trimpath', '-ldflags=-s -w -H=windowsgui', '-o', exe, '.'],
                 cwd=repo, env=windows_env)
@@ -108,15 +113,17 @@ def prepare(destination, go, repo=ROOT):
             run([native, '--generate', '--count', '2', '--seed', 'WULFF-2026', '--colors', '--out', examples], cwd=repo)
             source = work / f'WulffGenerator_source_v{v}.zip'
             make_source_zip(source, repo)
-            archive = destination / f'WulffGenerator_Windows_x64_v{v}.zip'
+            archive = destination / f'GeoMap_Wulff_Windows_x64_v{v}.zip'
             with ZipFile(archive, 'w', ZIP_DEFLATED, compresslevel=9) as z:
                 z.write(exe, exe.name)
                 z.write(source, source.name)
                 z.write(repo / 'README.md', 'README.md')
-                z.writestr('START_HERE.txt', '\ufeffРаспакуйте архив и запустите WulffGenerator.exe.\n'
-                           'Откроется отдельное окно Windows; браузер и интернет не нужны.\n'
+                z.writestr('START_HERE.txt', '\ufeffРаспакуйте архив и запустите GeoMap_Wulff.exe.\n'
+                           'Откроется GeoMap с вкладками «Геологическая карта» и «Сетка Вульфа».\n'
+                           'Интерфейс открывается в браузере; интернет и установка не нужны.\n'
+                           'Для отдельного окна Вульфа: GeoMap_Wulff.exe --desktop.\n'
                            'Примеры заданий и ответы находятся в examples.\n'
-                           'Печать A4: фактический размер / 100%. Подробности — README.md.\n')
+                           'Задания Вульфа: печать A4 / 100%. Карта экспортируется на своей вкладке. Подробности — README.md.\n')
                 for p in sorted(examples.iterdir()):
                     if p.name != 'wulff-set.zip':
                         z.write(p, 'examples/' + p.name)
@@ -125,6 +132,7 @@ def prepare(destination, go, repo=ROOT):
                 goroot = Path(run([go, 'env', 'GOROOT'], capture=True).strip())
                 z.write(goroot / 'LICENSE', 'licenses/GO-LICENSE.txt')
             meta = {'schema': 1, 'version': v, 'tag': 'v' + v, 'archive': archive.name,
+                    'product': PRODUCT, 'executable': PROGRAM_EXE,
                     'sha256': checksum(archive), 'source_commit': git('rev-parse', 'HEAD', repo=repo),
                     'source_zip_sha256': checksum(source), 'go_version': go_version.strip()}
             (destination / 'manifest.json').write_text(json.dumps(meta, indent=2) + '\n')

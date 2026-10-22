@@ -55,6 +55,23 @@ class BackupSafetyTests(unittest.TestCase):
                 backup.prepare(folder, '/not/a/compiler')
             self.assertEqual(sentinel.read_bytes(), b'previous release')
 
+    def test_combined_program_executable_is_verified_without_changing_old_versions(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp) / 'v1.6.0'
+            folder.mkdir()
+            archive = folder / 'combined.zip'
+            with ZipFile(archive, 'w') as z:
+                z.writestr('GeoMap_Wulff.exe', b'MZ combined fixture')
+            digest = backup.checksum(archive)
+            meta = {'version': '1.6.0', 'archive': archive.name, 'sha256': digest, 'executable': 'GeoMap_Wulff.exe'}
+            (folder / 'manifest.json').write_text(json.dumps(meta))
+            (folder / 'SHA256SUMS.txt').write_text(f'{digest}  {archive.name}\n')
+            self.assertEqual(backup.verify_backup(folder)['executable'], 'GeoMap_Wulff.exe')
+            meta['executable'] = 'missing.exe'
+            (folder / 'manifest.json').write_text(json.dumps(meta))
+            with self.assertRaisesRegex(RuntimeError, 'EXE missing'):
+                backup.verify_backup(folder)
+
 
 if __name__ == '__main__':
     unittest.main()

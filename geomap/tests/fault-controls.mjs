@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { generateModel } from '../js/geology.js';
+const base={minT:4,maxT:32,enableFaults:true,minFaults:1,maxFaults:2,customFaultParams:false,faultCount:2,manualFaults:[{type:'сброс',slip:10,az:45,dip:60},{type:'сдвиг',slip:14,az:120,dip:75}],customLayerCount:false,layerCount:5,customDip:false,dip:25,customAzimuth:false,azimuth:90};
+const m1=generateModel(42,[{...base,customFaultParams:true,faultCount:2}]);
+assert.equal(m1.faults.length,2);
+assert.deepEqual(m1.faults.map(f=>({kind:f.kind,slip:f.slip,az:f.az,dip:f.dip})), base.manualFaults.map(f=>({kind:f.type,slip:f.slip,az:f.az,dip:f.dip})));
+const m2=generateModel(42,[{...base,customFaultParams:true,faultCount:1}]);
+assert.equal(m2.faults.length,1);
+assert.deepEqual(m2.faults.map(f=>({kind:f.kind,slip:f.slip,az:f.az,dip:f.dip})), [ {kind:base.manualFaults[0].type,slip:base.manualFaults[0].slip,az:base.manualFaults[0].az,dip:base.manualFaults[0].dip} ]);
+const m3=generateModel(42,[{...base,customFaultParams:false,minFaults:2,maxFaults:2}]);
+assert.equal(m3.faults.length,2);
+assert.notDeepEqual(m3.faults.map(f=>f.kind), ['сброс','сдвиг']);
+console.log('PASS manual fault controls: type, amplitude, azimuth, dip, exact count, fallback random mode');

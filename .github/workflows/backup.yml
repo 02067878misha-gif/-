@@ -18,6 +18,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.3'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Configure backup author
         run: |
           git config user.name 'github-actions[bot]'
@@ -27,6 +30,12 @@ jobs:
           go test ./...
           go vet ./...
           python3 -m unittest discover -s scripts/tests -v
+          node geomap/tests/v22-division-ages.mjs
+          node geomap/tests/v21-strat-terrain.mjs
+          node geomap/tests/intrusions-v20.mjs
+          node geomap/tests/inherited-folds.mjs
+          node geomap/tests/folding-model.mjs
+          node geomap/tests/layer-controls.mjs
       - name: Save immutable version backup and tag
         run: python3 scripts/backup_version.py --push
       - name: Publish backed-up versions without replacing releases

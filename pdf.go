@@ -14,7 +14,7 @@ import (
 	"github.com/phpdave11/gofpdf"
 )
 
-//go:embed assets/* web/*
+//go:embed assets/* web/* geomap/index.html geomap/styles.css geomap/js/*.js geomap/suite.js geomap/suite.css
 var resources embed.FS
 
 func planeText(p Plane) string {

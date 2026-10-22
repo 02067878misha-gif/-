@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoMap + Сетка Вульфа</title>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="suite.css"><link rel="icon" href="wulff/assets/favicon.svg" type="image/svg+xml"></head>
+<body>
+<header class="suite-header"><div class="suite-heading"><div><b>Геологический картограф</b><small>GeoMap + Сетка Вульфа · без интернета</small></div><div class="suite-actions"><span class="suite-version">1.6</span><button type="button" id="suite-exit" aria-label="Закрыть программу">Закрыть</button></div></div>
+<nav class="suite-tabs" role="tablist" aria-label="Разделы программы"><button type="button" id="tab-map" role="tab" aria-selected="true" aria-controls="panel-map" data-suite-tab="map">Геологическая карта</button><button type="button" id="tab-wulff" role="tab" aria-selected="false" aria-controls="panel-wulff" tabindex="-1" data-suite-tab="wulff">Сетка Вульфа<span>Задания и ответы</span></button></nav></header>
+<section id="panel-map" class="suite-panel" role="tabpanel" aria-labelledby="tab-map">
+<div class="layout">
+<aside class="editor-sidebar" aria-label="Настройки геологической карты">
+ <details class="settings-card map-card" id="mapSettingsCard" aria-labelledby="mapSettingsTitle" open>
+  <summary class="card-heading map-card-heading">
+   <span class="card-number">01</span>
+   <div class="card-heading-text"><h2 id="mapSettingsTitle">Настройки карты</h2><p>Общие параметры, разрез и экспорт</p></div>
+  </summary>
+  <div class="card-content">
+   <div class="field-label">Генерация модели</div>
+   <div class="seed-toolbar"><label for="seed">SEED</label><input id="seed" type="number" step="1" value="42"><button id="prevSeed" title="Предыдущий SEED" aria-label="Предыдущий SEED">−</button><button id="nextSeed" title="Следующий SEED" aria-label="Следующий SEED">+</button><button id="generate" class="primary" type="button">Создать</button></div>
+   <div class="field-label">Сохранение карты</div>
+   <div class="export-toolbar"><button class="primary" id="savePdf" type="button">Сохранить PDF</button><button id="save" type="button">Сохранить SVG</button></div>
+   <div class="status" id="status" role="status" aria-live="polite">Подготовка…</div>
+   <div class="map-stats" id="mapStats" aria-label="Общие сведения о карте">
+    <div><b id="statComplexes">—</b><span>комплексов</span></div><div><b id="statLayers">—</b><span>слоёв</span></div><div><b id="statFaults">—</b><span>разломов</span></div><div><b id="statIntrusions">—</b><span>интрузий</span></div>
+   </div>
+   <details class="map-subsection"><summary>Отображение карты</summary><div class="subsection-content">
+    <label class="opt"><input type="checkbox" id="placeLabels"> Подписывать слой по клику</label>
+    <label class="opt"><input type="checkbox" id="showContours" checked> Горизонтали с отметками</label>
+    <label class="opt"><input type="checkbox" id="showFaults" checked> Показывать линии разломов</label>
+    <label class="opt"><input type="checkbox" id="showColors"> Цветная заливка слоёв</label>
+    <div class="age-button-toolbar"><button id="labelAges" type="button">Подписать возраста пород</button><button id="clearAges" type="button" title="Убрать подписи возрастов" disabled>Убрать возраста</button></div>
+    <div class="control"><label for="previewStep">Шаг сетки при подборе</label><select id="previewStep"><option value="2">2 м · быстро</option><option value="1" selected>1 м</option><option value="0.5">0,5 м</option><option value="0.25">0,25 м</option><option value="0.1">0,1 м · максимально</option></select></div>
+    <div class="control"><label for="ci">Шаг горизонталей</label><select id="ci"><option value="5" selected>5 м</option><option value="10">10 м</option></select></div>
+    <div class="control"><label for="faultStyle">Стиль линий разломов</label><select id="faultStyle"><option value="geo" selected>геологический</option><option value="solid">все сплошные</option><option value="dash">все пунктирные</option><option value="redsolid">сплошные красные</option></select></div>
+    <div class="input-grid"><label>Толщина границ <input id="boundaryWidth" type="number" min="0.1" max="3" step="0.05" value="0.5"></label><label>Толщина разломов <input id="faultWidth" type="number" min="0.1" max="3" step="0.05" value="0.75"></label></div>
+    <div class="input-grid"><label>Основной шрифт <input id="fontMain" type="number" min="2" max="8" step="0.1" value="3.5"></label><label>Шрифт горизонталей <input id="fontContour" type="number" min="2" max="8" step="0.1" value="3.0"></label><label>Шрифт слоёв <input id="fontLayer" type="number" min="2" max="8" step="0.1" value="3.2"></label></div>
+    <button id="clearLabels" class="text-button" type="button">Очистить подписи слоёв</button>
+    <p class="hint">Возраст пород назначается по отделам (эпохам) международной хроностратиграфической шкалы; протерозой — по системам. Подписи возрастов рассчитываются по выходам пород на карте. Для удаления ручной подписи удерживайте Shift и нажмите рядом с ней.</p>
+   </div></details>
+   <details class="map-subsection"><summary>Линия разреза А–Б</summary><div class="subsection-content">
+    <label class="opt"><input id="showSectionLine" type="checkbox" checked> Показывать линию разреза на карте</label>
+    <p class="hint">Линия разреза тёмная, пунктирная. Её можно скрыть, но разрез продолжит строиться.</p>
+    <div class="slider-control"><div class="control"><label for="cx">X центра</label><span id="xVal"></span></div><input id="cx" type="range" min="0" max="200" step="1" value="100"></div>
+    <div class="slider-control"><div class="control"><label for="cy">Y центра</label><span id="yVal"></span></div><input id="cy" type="range" min="0" max="150" step="1" value="75"></div>
+    <div class="slider-control"><div class="control"><label for="angle">Угол поворота</label><span id="angleVal"></span></div><input id="angle" type="range" min="0" max="359" step="1" value="15"></div>
+    <div class="slider-control"><div class="control"><label for="len">Длина разреза</label><span id="lenVal"></span></div><input id="len" type="range" min="30" max="240" step="1" value="185"></div>
+   </div></details>
+   <details class="map-subsection"><summary>Общие сведения и параметры слоёв</summary><div class="subsection-content">
+     <div id="modelInfo" class="stat">Генерация модели…</div>
+     <details class="layers-details"><summary id="layersHeading">Параметры слоёв</summary><div id="layersInfo" class="layers-table-container"></div></details>
+     <div class="hint">Размер карты — 25 × 18,7 см. PDF сохраняется через окно печати с масштабом 100% и без полей. Линия А–Б в файлы не включается. Возрастная шкала — ICS/CGMW; цвета отделов соответствуют принятой геологической цветовой шкале; каждый отдел имеет один фиксированный цвет. Подписи на карте условно сокращены; полные названия находятся в таблице. При повторе возраста цвет повторяется.</div>
+   </div></details>
+  </div>
+ </details>
+ <details class="settings-card terrain-card" id="terrainSettingsCard" aria-labelledby="terrainSettingsTitle" open>
+  <summary class="card-heading"><span class="card-number">02</span><div class="card-heading-text"><h2 id="terrainSettingsTitle">Настройки рельефа</h2><p>Расчленённость, интенсивность и врезание</p></div></summary>
+  <div class="card-content">
+   <div class="terrain-control"><label for="terrainDissection">Расчленённость <b id="terrainDissectionVal">100%</b></label><input id="terrainDissection" type="range" min="0" max="200" step="5" value="100"></div>
+   <div class="terrain-control"><label for="terrainIntensity">Интенсивность рельефа <b id="terrainIntensityVal">100%</b></label><input id="terrainIntensity" type="range" min="0" max="200" step="5" value="100"></div>
+   <div class="terrain-control"><label for="terrainIncision">Глубина врезания <b id="terrainIncisionVal">24 м</b></label><input id="terrainIncision" type="range" min="0" max="80" step="1" value="24"></div>
+   <label class="opt"><input id="terrainFlat" type="checkbox"> Субгоризонтальный рельеф</label>
+   <label class="opt"><input id="terrainPositiveIntrusions" type="checkbox"> Положительные формы рельефа над интрузиями</label>
+   <p class="hint">Расчленённость влияет на густоту и размеры форм; интенсивность — на перепады высот; глубина врезания — на эрозионные долины. Субгоризонтальный режим сильно сглаживает рельеф.</p>
+  </div>
+ </details>
+ <div class="complexes-heading"><div><h2>Геологические комплексы</h2><p>От древнего к молодому · независимые параметры</p></div><span id="complexCount">1</span></div>
+ <div id="complexes"></div>
+ <button id="addComplex" class="add-complex" type="button">＋ Добавить молодой комплекс</button>
+ <p class="hint sidebar-footnote">Каждый новый комплекс моложе предшествующих. Условия складчатости, разломы и интрузии настраиваются отдельно для каждого комплекса.</p>
+ <button id="exit" class="exit-button" type="button">Закрыть приложение</button>
+</aside>
+<main>
+ <section class="panel"><h3>Геологическая карта <span class="preview-meta">Поле 25 × 18,7 см</span></h3><div class="map-wrap"><svg id="mapSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 215"></svg></div></section>
+ <section class="panel age-legend-panel" aria-labelledby="ageLegendTitle"><h3 id="ageLegendTitle">Стратиграфическая легенда <span class="preview-meta">Молодые сверху · древние снизу</span></h3><div id="ageLegend" class="age-legend-grid"></div><p class="legend">Цвет и индекс соответствуют отделу (эпохе); для протерозоя используются системы. Повторяющийся возраст имеет тот же цвет. Слои указаны по номерам.</p></section>
+ <section class="panel"><h3>Геологический разрез А–Б <span class="preview-meta">Мг = Мв</span></h3><div class="section-wrap"><svg id="sectionSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100"></svg></div><p class="legend">На разрезе горизонтальный и вертикальный масштабы равны. Тёмная пунктирная линия на карте соответствует выбранному профилю.</p></section>
+</main>
+</div>
+</section>
+<section id="panel-wulff" class="suite-panel wulff-panel" role="tabpanel" aria-labelledby="tab-wulff" hidden><p id="wulff-loading" role="status">Загружаем генератор заданий…</p><iframe id="wulff-frame" title="Генератор заданий на сетке Вульфа"></iframe></section>
+<script src="suite.js" defer></script><script type="module" src="js/events.js"></script></body></html>

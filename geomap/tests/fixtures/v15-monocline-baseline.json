@@ -1,0 +1,308 @@
+[
+  {
+    "seed": 42,
+    "configs": [
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": true,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": false,
+        "layerCount": 5,
+        "customDip": false,
+        "dip": 25,
+        "customAzimuth": false,
+        "azimuth": 90,
+        "customFaultParams": false,
+        "faultCount": 2
+      }
+    ],
+    "complexes": [
+      {
+        "az": 111,
+        "d": 36,
+        "T": [
+          null,
+          18,
+          12,
+          23,
+          null
+        ],
+        "baseZ": 20.36183809239308,
+        "firstUnit": 1,
+        "faults": [
+          {
+            "complexIndex": 0,
+            "old": false,
+            "name": "F1",
+            "az": 116.84389784932137,
+            "dip": 60,
+            "cx": 149.64109852910042,
+            "cy": 27.15819926932454,
+            "ref": 50.09057223096172,
+            "kind": "сдвиг",
+            "slip": 11.666689470410347
+          }
+        ]
+      }
+    ],
+    "hashUnits": "e9e2fa7b36f8149cd7f3a6c54358e6388f8bb491dbdc2dd409a139adfe51fc71",
+    "hashHeights": "120c0a1aaf9b39c0c4d84b1e83a286dea8cca2f78a4babf8fdeb68b448c108e5"
+  },
+  {
+    "seed": 41,
+    "configs": [
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": true,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": false,
+        "layerCount": 5,
+        "customDip": false,
+        "dip": 25,
+        "customAzimuth": false,
+        "azimuth": 90,
+        "customFaultParams": false,
+        "faultCount": 2
+      },
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": false,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": false,
+        "layerCount": 5,
+        "customDip": false,
+        "dip": 25,
+        "customAzimuth": false,
+        "azimuth": 90,
+        "customFaultParams": false,
+        "faultCount": 2
+      }
+    ],
+    "complexes": [
+      {
+        "az": 70,
+        "d": 27,
+        "T": [
+          null,
+          11,
+          14,
+          26,
+          null
+        ],
+        "baseZ": 22.578790534406885,
+        "firstUnit": 1,
+        "faults": [
+          {
+            "complexIndex": 0,
+            "old": true,
+            "name": "F1",
+            "az": 36.14319873042405,
+            "dip": 72,
+            "cx": 97.084403000772,
+            "cy": 97.77206306578591,
+            "ref": 30.988295850577035,
+            "kind": "сдвиг",
+            "slip": 10.452074624598026
+          }
+        ]
+      },
+      {
+        "az": 117,
+        "d": 15,
+        "T": [
+          5,
+          20,
+          30,
+          16,
+          null
+        ],
+        "baseZ": 50.578790534406885,
+        "firstUnit": 6,
+        "faults": []
+      }
+    ],
+    "hashUnits": "bbed0b50bbc6c5b842df63633a804f5fd16a3a8050f71a71b5880b8e7d998fbb",
+    "hashHeights": "1ba6b694c25a97f72072cd2b737c85b104c4a7dd6839c4fde1f112215260853c"
+  },
+  {
+    "seed": -42,
+    "configs": [
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": true,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": true,
+        "layerCount": 4,
+        "customDip": false,
+        "dip": 25,
+        "customAzimuth": false,
+        "azimuth": 90,
+        "customFaultParams": false,
+        "faultCount": 2
+      },
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": true,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": false,
+        "layerCount": 5,
+        "customDip": true,
+        "dip": 35,
+        "customAzimuth": true,
+        "azimuth": 135,
+        "customFaultParams": false,
+        "faultCount": 2
+      }
+    ],
+    "complexes": [
+      {
+        "az": 346,
+        "d": 34,
+        "T": [
+          null,
+          25,
+          16,
+          null
+        ],
+        "baseZ": 32.873407167328104,
+        "firstUnit": 1,
+        "faults": [
+          {
+            "complexIndex": 0,
+            "old": true,
+            "name": "F1",
+            "az": 6.15398530382663,
+            "dip": 49,
+            "cx": 52.09330081939697,
+            "cy": 72.1484060282819,
+            "ref": 71.6829761133601,
+            "kind": "сдвиг",
+            "slip": 16.394458763301373
+          },
+          {
+            "complexIndex": 0,
+            "old": true,
+            "name": "F2",
+            "az": 77.91229537222534,
+            "dip": 59,
+            "cx": 127.29365214705467,
+            "cy": 105.13055647024885,
+            "ref": 38.11829554466108,
+            "kind": "взброс",
+            "slip": 11.141858798684552
+          }
+        ]
+      },
+      {
+        "az": 135,
+        "d": 35,
+        "T": [
+          15,
+          28,
+          6,
+          20,
+          null
+        ],
+        "baseZ": 60.873407167328104,
+        "firstUnit": 5,
+        "faults": [
+          {
+            "complexIndex": 1,
+            "old": false,
+            "name": "F3",
+            "az": 119.54424182418734,
+            "dip": 45,
+            "cx": 136.8541993200779,
+            "cy": 42.744662459008396,
+            "ref": 56.774428988871556,
+            "kind": "сброс",
+            "slip": 8.387848085723817
+          },
+          {
+            "complexIndex": 1,
+            "old": false,
+            "name": "F4",
+            "az": 67.23164620343596,
+            "dip": 49,
+            "cx": 44.76940020918846,
+            "cy": 35.503800774458796,
+            "ref": 68.83948305146329,
+            "kind": "сдвиг",
+            "slip": 10.45023773983121
+          }
+        ]
+      }
+    ],
+    "hashUnits": "9de7dda1db55c93c3a70164fb492b6682c329be8bd7ef1d878bc6fd2088e4d0e",
+    "hashHeights": "4c595d0e3cf37f22f855d169e475ab6ee3f6b4a7abe9131688dbecf67fa8b2b3"
+  },
+  {
+    "seed": 61,
+    "configs": [
+      {
+        "minT": 4,
+        "maxT": 32,
+        "enableFaults": true,
+        "minFaults": 1,
+        "maxFaults": 2,
+        "customLayerCount": false,
+        "layerCount": 5,
+        "customDip": false,
+        "dip": 25,
+        "customAzimuth": false,
+        "azimuth": 90,
+        "customFaultParams": true,
+        "faultCount": 1,
+        "manualFaults": [
+          {
+            "type": "взброс",
+            "slip": 10,
+            "az": 80,
+            "dip": 60
+          }
+        ]
+      }
+    ],
+    "complexes": [
+      {
+        "az": 356,
+        "d": 24,
+        "T": [
+          null,
+          15,
+          25,
+          12,
+          null
+        ],
+        "baseZ": 22.768319546183243,
+        "firstUnit": 1,
+        "faults": [
+          {
+            "complexIndex": 0,
+            "old": false,
+            "name": "F1",
+            "az": 80,
+            "dip": 60,
+            "cx": 46.52180824428797,
+            "cy": 31.023371974006295,
+            "ref": 63.95023802919066,
+            "kind": "взброс",
+            "slip": 10
+          }
+        ]
+      }
+    ],
+    "hashUnits": "8175dfef0292cc78857f71f3faecf4875010131fdcd2cdb3f8be096846ad82c0",
+    "hashHeights": "3487c06ec2fd965e8a3022cb7389ef62d9047a4cb3b6eee63831eff2fe746ac5"
+  }
+]

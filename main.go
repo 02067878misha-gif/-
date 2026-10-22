@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "1.5.0"
+const version = "1.6.0"
 
 type app struct {
 	mu       sync.RWMutex
@@ -205,7 +205,8 @@ func main() {
 	flag.StringVar(&c.Title, "title", c.Title, "Заголовок")
 	flag.BoolVar(&c.ColorsEnabled, "colors", false, "Цветные элементы и подписи цветов для студентов")
 	noBrowser := flag.Bool("no-browser", false, "Не открывать браузер")
-	browser := flag.Bool("browser", false, "Открыть браузерный интерфейс вместо окна Windows")
+	browser := flag.Bool("browser", false, "Открыть только браузерный генератор сетки Вульфа")
+	desktop := flag.Bool("desktop", false, "Открыть отдельное настольное окно сетки Вульфа в Windows")
 	versionFlag := flag.Bool("version", false, "Версия")
 	flag.Parse()
 	if *versionFlag {
@@ -245,7 +246,7 @@ func main() {
 		fmt.Printf("Готово: %d вариантов, %d страниц заданий и столько же ответов. Код: %s. Папка: %s\n", c.Count, c.Count*pagesPerVariant(c), c.Seed, *out)
 		return
 	}
-	if !*noBrowser && !*browser {
+	if *desktop {
 		c.Tasks = strings.Split(*tasks, ",")
 		if handled, err := runDesktop(c); handled {
 			if err != nil {
@@ -262,7 +263,11 @@ func main() {
 	url := "http://" + l.Addr().String() + base
 	a := &app{busy: make(chan struct{}, 1)}
 	a.last.Store(time.Now().Unix())
-	server := &http.Server{Handler: a.handler(base), ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
+	handler := a.suiteHandler(base)
+	if *browser {
+		handler = a.handler(base)
+	}
+	server := &http.Server{Handler: handler, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
 	a.shutdown = func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
@@ -278,7 +283,7 @@ func main() {
 			}
 		}
 	}()
-	fmt.Println("Сетка Вульфа " + version + " · " + url)
+	fmt.Println("GeoMap + Сетка Вульфа " + version + " · " + url)
 	if !*noBrowser {
 		openBrowser(url)
 	}
