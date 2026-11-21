@@ -1,4 +1,5 @@
 """Build the Corel add-on and the full reproducible source bundle."""
+from hashlib import sha256
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -15,6 +16,8 @@ with ZipFile(out / "StrataDraw-CorelDRAW2025.zip", "w", ZIP_DEFLATED) as package
     for name in ("LICENSE", "README.md"):
         package.write(root / name, name)
     package.write(root / "scripts/Check-Corel.ps1", "Check-Corel.ps1")
+
+(out / "payload.sha256").write_text(sha256((out / "StrataDraw-CorelDRAW2025.zip").read_bytes()).hexdigest())
 
 with ZipFile(out / "StrataDraw-project.zip", "w", ZIP_DEFLATED) as package:
     sources = [root / name for name in ("README.md", "LICENSE", ".gitignore", "global.json", "NuGet.Config")]

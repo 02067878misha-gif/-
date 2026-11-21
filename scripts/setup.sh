@@ -20,3 +20,4 @@ source scripts/activate.sh
 dotnet --version
 dotnet restore src/Panel/Panel.csproj --locked-mode --configfile NuGet.Config
 dotnet restore tests/Check.csproj --locked-mode --configfile NuGet.Config
+dotnet restore src/Installer/Installer.csproj --locked-mode --configfile NuGet.Config

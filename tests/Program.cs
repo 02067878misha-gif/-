@@ -14,6 +14,11 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        if (args.Length == 3 && args[0] == "--check-installer")
+        {
+            InstallerCheck.Run(args[1], args[2]);
+            return;
+        }
         Registration.Check();
         Functional.Run(args[0]);
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
