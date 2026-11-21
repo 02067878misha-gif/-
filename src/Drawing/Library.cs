@@ -19,17 +19,31 @@ namespace StrataDraw
         public static List<Entry> Tiles(string root) => File.ReadLines(Path.Combine(root, "tiles.tsv"))
             .Select(l => l.Split('\t')).Select(v => new Entry { Name = "FGDC " + v[0] + " " + v[1], Key = v[0] + ".svg", NativeWidth = double.Parse(v[2], CultureInfo.InvariantCulture), Location = Path.Combine(root, "fgdc.zip") })
             .Concat(NamedTiles(root, "basic", "Базовый профиль 2013 · "))
-            .Concat(RockPatterns(root)).ToList();
+            .Concat(NamedTiles(root, "sdar", ""))
+            .Concat(NamedTiles(root, "equinor", "")).ToList();
 
-        public static List<Entry> RockPatterns(string root) => NamedTiles(root, "sdar", "").ToList();
+        public static List<Entry> RockPatterns(string root) => NamedTiles(root, "sdar", "")
+            .Concat(NamedTiles(root, "equinor", ""))
+            .Concat(NamedTiles(root, "fgdc-rocks", "", "fgdc"))
+            .Concat(NamedTiles(root, "basic", "Базовый профиль 2013 · ")).ToList();
 
-        private static IEnumerable<Entry> NamedTiles(string root, string catalog, string prefix) =>
+        public static Func<Entry, bool> RockSearch(string query)
+        {
+            var terms = query.Replace('ё', 'е').Replace('Ё', 'Е').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            return entry =>
+            {
+                string name = entry.Name.Replace('ё', 'е').Replace('Ё', 'Е');
+                return terms.All(term => name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0);
+            };
+        }
+
+        private static IEnumerable<Entry> NamedTiles(string root, string catalog, string prefix, string archive = null) =>
             File.ReadLines(Path.Combine(root, catalog + ".tsv")).Select(l => l.Split('\t')).Select(v => new Entry
             {
                 Name = prefix + v[1],
                 Key = v[0],
                 NativeWidth = double.Parse(v[2], CultureInfo.InvariantCulture),
-                Location = Path.Combine(root, catalog + ".zip")
+                Location = Path.Combine(root, (archive ?? catalog) + ".zip")
             });
         public static List<Entry> Symbols(string root)
         {

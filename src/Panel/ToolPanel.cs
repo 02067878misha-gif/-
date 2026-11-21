@@ -212,8 +212,10 @@ namespace StrataDraw
             Action filter = () =>
             {
                 var favorites = new HashSet<string>(Presets().SelectMany(p => p.Elements("value").Where(v => (string)v.Attribute("key") == "entry").Select(v => v.Value)));
+                Func<Entry, bool> match = page == "Крапы пород" ? Library.RockSearch(box.Text) :
+                    new Func<Entry, bool>(item => item.Name.IndexOf(box.Text, StringComparison.OrdinalIgnoreCase) >= 0);
                 list.ItemsSource = entries.Where(x => (mine.IsChecked != true || x.Key == null || favorites.Contains(x.Name)) &&
-                    x.Name.IndexOf(box.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    match(x)).ToList();
                 list.SelectedIndex = list.Items.Count > 0 ? 0 : -1;
             };
             box.TextChanged += (s, e) => filter(); mine.Checked += (s, e) => filter(); mine.Unchecked += (s, e) => filter();
