@@ -1,0 +1,162 @@
+SVG сохранён.	SVG saved.
+Алевролит	Siltstone
+Амплитуда, мм	Amplitude, mm
+Белый фон индекса	White label background
+Брекчия	Breccia
+Варьировать поворот знаков	Vary symbol rotation
+Варьировать размер знаков	Vary symbol size
+Векторный узор	Vector fill
+Вернуть исходную кривую	Restore original curve
+Вертикальная ось	Vertical axis
+Вертикальный масштаб 1 :	Vertical scale 1 :
+Включить геологические индексы	Include geological indices
+Внутри	Inside
+Возраст	Geologic age
+Волна	Wave
+Вставить знак	Insert symbol
+Вставить образец 48 × 24 мм	Insert 48 × 24 mm sample
+Второй знак	Second symbol
+Выбрать дополнительный знак…	Choose accessory glyph…
+Выбрать основной знак…	Choose primary glyph…
+Выбрать файл…	Choose file…
+Выполняется…	Working…
+Высота дополнительного знака, %	Accessory symbol height, %
+Высота знака, мм	Symbol height, mm
+Высота образца, мм	Legend swatch height, mm
+Высота, мм	Height, mm
+Гипс	Gypsum
+Глинистый сланец	Shale
+Горизонтальная ось	Horizontal axis
+Горизонтальная сетка	Horizontal grid
+Горизонтальный масштаб 1 :	Horizontal scale 1 :
+Горизонты	Horizons
+Готово.	Done.
+Гравий	Gravel
+Группировать по разделам	Group by section
+Двойная граница	Double boundary
+Двойной штрих	Double tick
+Длина волны, мм	Wavelength, mm
+Добавить параллельную линию	Add parallel line
+Добавить свои знаки…	Add custom symbols…
+Добавить свои плитки…	Add custom tiles…
+Доломит	Dolomite
+Дополнительный знак	Accessory symbol
+Допуск упрощения кривой, мм (0 — выключено)	Curve simplification tolerance, mm (0 = off)
+Заголовок	Title
+Загрузить	Load
+Знак	Symbol
+Зубчатая граница	Sawtooth boundary
+Известняк	Limestone
+Интервал групп, мм	Group spacing, mm
+Каждая N-я группа	Every Nth group
+Каждый N-й дополнительный знак	Every Nth accessory symbol
+Каменная соль	Rock salt
+Каротаж LAS	LAS well logs
+Квадрат	Square
+Кодировка	File encoding
+Конгломерат	Conglomerate
+Контакт	Contact
+Крест	Cross
+Кружок	Circle
+Левый край	Left edge
+Легенда	Legend
+Линия	Line
+Между дорожками, мм	Track gap, mm
+Мел	Argillite
+Мергель	Marl
+Метров на единицу X	Metres per X unit
+Метров на единицу Y	Metres per Y unit
+Множитель числа прослоев	Bed count multiplier
+Мощность прослоя, мм	Bed thickness, mm
+Моя коллекция настроек	My presets
+Надвиг	Thrust
+Названия в первой строке	First row contains names
+Найти по названию или номеру	Search by name or ID
+Нет	None
+Номера кривых через запятую (пусто — все)	Curve numbers separated by commas (blank = all)
+Обратить направление	Reverse direction
+Основная линия	Baseline style
+Основной знак	Primary symbol
+От молодых к древним	Youngest first
+Отметки возрастают вниз	Y values increase downwards
+Отступ от края, мм	Page margin, mm
+Отступ первого знака в долях шага	Initial offset as a fraction of spacing
+Оформление	Style preset
+Первый знак группы	First group symbol
+Песок	Sand
+Песчаник	Sandstone
+Пила	Sawtooth
+Поворот дополнительного знака, °	Accessory symbol rotation, °
+Поворот, °	Rotation, °
+Подключить шкалу XML…	Add an XML timescale…
+Подписывать индекс	Label index
+Подпись	Footer
+Положение индекса	Label position
+Полукруг	Semicircle
+Порода	Rock type
+Построить в документе	Draw in document
+Построить легенду	Build legend
+Правый край	Right edge
+Предполагаемый контакт	Inferred contact
+Применить к выделению	Apply to selection
+Пробел, мм	Gap, mm
+Пропустить строк	Skip header lines
+Прослои	Bedding
+Пунктир	Dashed
+Размер подписи, пт	Label size, pt
+Разместить в левом верхнем углу листа	Place at top-left of page
+Размыв	Erosion surface
+Рамка	Frame
+Расстояние между знаками, мм	Spacing between symbols, mm
+Рисовать границы прослоев	Draw bedding boundaries
+Ромб	Diamond
+Сброс	Normal fault
+Свой дополнительный знак (необязательно)	Custom accessory glyph (optional)
+Свой основной знак (необязательно)	Custom primary glyph (optional)
+Своя группа (по строке на знак, например Triangle;2;1;верх;2)	Custom group, one per line, e.g. Triangle;2;1;upper;2
+Слой результата (пусто — активный)	Output layer (blank = active layer)
+Случайное размещение	Random placement
+Смещать каждый второй ряд	Stagger alternate beds
+Смещение знаков по нормали, мм	Symbol offset from curve, mm
+Смещение параллельной линии, мм	Parallel line offset, mm
+Сохранить	Save
+Сохранить SVG…	Save SVG…
+Сплошная	Solid
+Стрелка	Arrow
+Строка на кривую: номер;дорожка;мин;макс;lin/log/rev/log-rev;цвет;толщина;заливка (0/1)	One curve per row: column;track;min;max;lin/log/rev/log-rev;colour;width;fill (0/1)
+Таблица горизонтов	Horizon table
+Толщина линии, мм	Line width, mm
+Толщина параллельной линии, мм	Parallel line width, mm
+Толщина, мм	Stroke width, mm
+Только мои	My items only
+Только по выделенным объектам	Selection only
+Точка	Dot
+Третий знак	Third symbol
+Треугольник	Triangle
+Тройная рамка	Triple frame
+Удалить	Remove
+Указать место легенды	Pick legend location
+Указать на чертеже	Pick on drawing
+Указать точку	Pick point
+Уступ	Scarp
+Файл LAS	LAS file
+Фиксированная ширина поля (0 — разделитель)	Fixed field width (0 = delimited)
+Цвет линии	Line colour
+Цвет линий	Stroke colour
+Чередование штрих–пробел, мм (например 4;1;1;1)	Alternating dashes and gaps, mm (e.g. 4;1;1;1)
+Чередовать волну с прямым отрезком	Alternate waves with straight segments
+Черта	Bar
+Число для повторения рисунка	Repeatable random seed
+Число колонок	Legend columns
+Число прослоев (0 — по мощности)	Bed count (0 = by thickness)
+Шаг знаков в долях мощности	Symbol spacing in bed thicknesses
+Шаг отметок глубины (0 — авто)	Depth tick interval (0 = automatic)
+Шеврон	Chevron
+Ширина дорожки, мм	Track width, mm
+Ширина знака, мм	Symbol width, mm
+Ширина колонки, мм	Column width, mm
+Ширина образца, мм	Swatch width, mm
+Ширина плитки, мм (0 — размер каталога)	Tile width, mm (0 = catalog size)
+Штрих	Tick
+Штрих, мм	Dash, mm
+Щёлкните на чертеже. Esc — отменить.	Click on the drawing. Esc cancels.

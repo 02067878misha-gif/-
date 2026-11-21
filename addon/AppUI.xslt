@@ -10,7 +10,7 @@
       <xsl:apply-templates select="@*|node()"/>
       <itemData guid="1f783856-93e9-483a-ab35-a3288f114177" type="wpfhost"
         hostedType="Addons\StrataDraw\StrataDraw.dll,StrataDraw.ToolPanel" enable="true"/>
-      <itemData guid="aa1d3465-12bf-41b0-bb52-649c67cef6e5" type="checkButton"
+      <itemData guid="aa1d3465-12bf-41b0-bb52-649c67cef6e5" type="checkButton" noBmpOnMenu="true" dynamicCategory="2cc24a3e-fe24-4708-9a74-9c75406eebcd"
         userCaption="Strata Draw" enable="true" check="*Docker('31a95ea4-d384-4cb7-924f-cbddac9aad33')"/>
     </xsl:copy>
   </xsl:template>

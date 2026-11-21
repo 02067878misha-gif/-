@@ -1,0 +1,43 @@
+17.001: Outline of slip surface of landslide—Identity and existence certain, location accurate	#232323	0.2	-
+25.001: Contact, planetary - Location accurate	#000000	0.15	-
+25.002: Contact, planetary - Location approximate	#000000	0.15	3.5;0.75
+25.003: Contact, planetary - Location inferred	#000000	0.15	1.5;0.75
+25.004: Contact, planetary - Location concealed	#000000	0.15	0.5;0.75
+25.005: Fault, planetary, sense of offset unspecified - Location accurate	#000000	0.375	-
+25.006: Fault, planetary, sense of offset unspecified - Location approximate	#000000	0.375	3.5;0.75
+25.007: Fault, planetary, sense of offset unspecified - Location inferred	#000000	0.375	1.5;0.75
+25.008: Fault, planetary, sense of offset unspecified - location concealed	#000000	0.375	0.5;0.75
+25.029: Regional fracture, planetary	#00FFFF	0.3	-
+25.030: Partly buried regional fracture, planetary	#00FFFF	0.3	1.5;0.75
+25.031: Arcuate fracture, planetary	#2B3898	0.2	-
+25.032: Partly buried arcuate fracture, planetary	#2B3898	0.2	1.5;0.75
+25.033: Radial fracture, planetary (associated with coronae)	#2B3898	0.325	-
+25.034: Concentric fracture, planetary (associated with coronae)	#922898	0.325	-
+25.035: Fold crest, planetary	#FF0000	0.3	-
+25.036: Broad warp, planetary	#FF0000	0.625	0.75;0.75
+25.037: Wrinkle ridge, planetary	#FF00FF	0.25	-
+25.038: Ribbon trends, planetary	#00FF00	0.25	-
+25.040: Broad ridge crest, planetary (generally associated with coronae)	#FF0000	0.635	-
+25.047: Groove (generic), planetary	#000000	0.25	-
+25.050: Radially grooved ejecta (schematic), planetary	#000000	0.25	0.75;0.75;0.75;0.75;0.25;0.75
+25.055: Shallow, linear depression or valley, or narrow channel, planetary	#00FFFF	0.25	-
+25.056: Channel (canali), planetary	#000000	0.25	2.5;0.5;0.5;0.5
+25.057: Channel (canali)-Two short dashes where structureless or indefinite	#000000	0.25	2.5;0.5;0.5;0.5;0.5;0.5
+25.062: Layer, planetary	#000000	0.2	1.125;0.75
+25.063: Lineament, planetary	#000000	0.3	1.5;0.5
+25.064: Layering in canyon wall, planetary	#000000	0.2	-
+25.065: Fabric of short radar-bright lineaments (schematic), planetary	#000000	0.25	-
+25.066: Penetrative lineations, within tessera terrain, planetary	#000000	0.125	-
+25.091: Corona, planetary	#232323	0.25	1.5;0.75
+25.092: Nova, planetary	#232323	0.5	2.25;0.75
+25.095: Raised rim of smaller impact crater, planetary	#232323	0.3	-
+25.097: Degraded impact crater rim, planetary (1st option)	#232323	0.3	1;0.5
+25.098: Rimless impact crater, subdued impact crater rim, degraded impact crater rim (2nd option), or buried impact crater rim, planetary	#232323	0.3	4;0.5;0.2;0.5
+25.099: Secondary impact crater chain and cluster, planetary	#232323	0.25	1.5;0.5
+25.100: Basin ring, planetary	#232323	0.375	0.75;0.75
+25.105: Pit-crater chain (mapped to scale), planetary	#232323	0.2	-
+25.107: Small endogenic crater (mapped to scale), planetary	#232323	0.25	-
+25.115: Mountain (rugged), planetary—Origin uncertain	#808080	0.2	-
+25.116: Channel bars, planetary—May be erosional or depositional	#B3B3B3	0.2	-
+30.1.001: Index topographic contour (1st option)	#A84A09	0.25	-
+30.1.003: Intermediate topographic contour (1st option)	#A84A09	0.15	-

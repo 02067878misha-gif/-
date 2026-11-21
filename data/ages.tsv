@@ -1,0 +1,171 @@
+eons	Phanerozoic	538.8	0.0	Phnz	#9AD9DD	Фанерозой
+eons	Proterozoic	2500.0	538.8	Ptz	#F73563	Протерозой
+eons	Archean	4031.0	2500.0	Arc	#F0047F	Архей
+eras	Cenozoic	66.0	0.0	Cz	#F2F91D	Кайнозой
+eras	Mesozoic	251.902	66.0	Mz	#67C5CA	Мезозой
+eras	Paleozoic	538.8	251.902	Pz	#99C08D	Палеозой
+eras	Neoproterozoic	1000.0	538.8	Nptz	#FEB342	Неопротерозой
+eras	Mesoproterozoic	1600.0	1000.0	Mptz	#FDB462	Мезопротерозой
+eras	Paleoproterozoic	2500.0	1600.0	Pptz	#F74370	Палеопротерозой
+eras	Neoarchean	2800.0	2500.0	Narc	#F99BC1	Неоархей
+eras	Mesoarchean	3200.0	2800.0	Marc	#F768A9	Мезоархей
+eras	Paleoarchean	3600.0	3200.0	Parc	#F444A9	Палеоархей
+eras	Eoarchean	4031.0	3600.0	Earc	#DA037F	Эоархей
+periods	Quaternary	2.58	0.0	Q	#F9F97F	Четвертичный
+periods	Neogene	23.04	2.58	Ng	#FFE619	Неоген
+periods	Paleogene	66.0	23.04	Pg	#FD9A52	Палеоген
+periods	Cretaceous	143.1	66.0	K	#7FC64E	Мел
+periods	Jurassic	201.4	143.1	J	#34B2C9	Юра
+periods	Triassic	251.902	201.4	Tr	#812B92	Триас
+periods	Permian	298.9	251.902	P	#F04028	Пермь
+periods	Carboniferous	358.86	298.9	C	#67A599	Карбон
+periods	Devonian	419.62	358.86	D	#CB8C37	Девон
+periods	Silurian	443.1	419.62	S	#B3E1B6	Силур
+periods	Ordovician	486.85	443.1	O	#009270	Ордовик
+periods	Cambrian	538.8	486.85	Cm	#7FA056	Кембрий
+periods	Ediacaran	635.0	538.8	E	#FED96A	Эдиакарий
+periods	Cryogenian	720.0	635.0	Cr	#FECC5C	Криогений
+periods	Tonian	1000.0	720.0	T	#FEBF4E	Тоний
+periods	Stenian	1200.0	1000.0	St	#FED99A	Стений
+periods	Ectasian	1400.0	1200.0	Ec	#F3CC8A	Эктазий
+periods	Calymmian	1600.0	1400.0	Ca	#FDC07A	Калиммий
+periods	Statherian	1800.0	1600.0	St	#F875A7	Статерий
+periods	Orosirian	2050.0	1800.0	Or	#F76898	Орозирий
+periods	Rhyacian	2300.0	2050.0	R	#F75B89	Риасий
+periods	Siderian	2500.0	2300.0	Sd	#F74F7C	Сидерий
+epochs	Holocene	0.0117	0.0	H	#FEF2E0	Голоцен
+epochs	Pleistocene	2.58	0.0117	Ple	#FFF2AE	Плейстоцен
+epochs	Pliocene	5.333	2.58	Pli	#FFFF99	Плиоцен
+epochs	Miocene	23.04	5.333	Mio	#FFFF00	Миоцен
+epochs	Oligocene	33.9	23.04	Ol	#FDC07A	Олигоцен
+epochs	Eocene	56.0	33.9	Eo	#FDB46C	Эоцен
+epochs	Paleocene	66.0	56.0	Pal	#FDA75F	Палеоцен
+epochs	Late Cretaceous	100.5	66.0	LC	#A6D84A	Поздний мел
+epochs	Early Cretaceous	143.1	100.5	EC	#8CCD57	Ранний мел
+epochs	Late Jurassic	161.5	143.1	LJ	#B3E3EE	Поздний юра
+epochs	Middle Jurassic	174.7	161.5	MJ	#80CFD8	Средний юра
+epochs	Early Jurassic	201.4	174.7	EJ	#42AED0	Ранний юра
+epochs	Late Triassic	237.0	201.4	LT	#BD8CC3	Поздний триас
+epochs	Middle Triassic	246.7	237.0	MT	#B168B1	Средний триас
+epochs	Early Triassic	251.902	246.7	ET	#983999	Ранний триас
+epochs	Lopingian	259.51	251.902	Lp	#FBA794	Лопинский
+epochs	Guadalupian	274.4	259.51	G	#FB745C	Гваделупский
+epochs	Cisuralian	298.9	274.4	C	#EF5845	Приуральский
+epochs	Pennsylvanian	323.4	298.9	Pn	#99C2B5	Пенсильваний
+epochs	Mississippian	358.86	323.4	Ms	#678F66	Миссисипий
+epochs	Late Devonian	382.31	358.86	LD	#F1E19D	Поздний девон
+epochs	Middle Devonian	393.47	382.31	MD	#F1C868	Средний девон
+epochs	Early Devonian	419.62	393.47	ED	#E5AC4D	Ранний девон
+epochs	Pridoli	422.7	419.62	Pr	#E6F5E1	Пржидоли
+epochs	Ludlow	426.7	422.7	Ld	#BFE6CF	Лудлов
+epochs	Wenlock	432.9	426.7	W	#B3E1C2	Венлок
+epochs	Llandovery	443.1	432.9	Ll	#99D7B3	Лландовери
+epochs	Late Ordovician	458.2	443.1	LO	#7FCA93	Поздний ордовик
+epochs	Middle Ordovician	471.3	458.2	MO	#4DB47E	Средний ордовик
+epochs	Early Ordovician	486.85	471.3	EO	#1A9D6F	Ранний ордовик
+epochs	Furongian	497.0	486.85	F	#B3E095	Фуронгский
+epochs	Miaolingian	506.5	497.0	Ml	#A6CF86	Мяолинский
+epochs	Series 2	521.0	506.5	S2	#99C078	Series 2
+epochs	Terreneuvian	538.8	521.0	T	#8CB06C	Терреневский
+stages	Meghalayan	0.0042	0.0	Mg	#FEF2E0	Мегхалайский
+stages	Northgrippian	0.0082	0.0042	Nrt	#FEF2E0	Нортгриппский
+stages	Greenlandian	0.0117	0.0082	Grn	#FEF2E0	Гренландский
+stages	Late Pleistocene	0.129	0.0117	LP	#FFF2C7	Верхний плейстоцен
+stages	Chibanian	0.774	0.129	Chb	#FFF2C7	Чибанский
+stages	Calabrian	1.8	0.774	Clb	#FFF2C7	Калабрийский
+stages	Gelasian	2.58	1.8	Gl	#FFEDB3	Гелазский
+stages	Piacenzian	3.6	2.58	Pc	#FFFFBF	Пьяченцский
+stages	Zanclean	5.333	3.6	Z	#FFFFB3	Занклский
+stages	Messinian	7.246	5.333	Mss	#FFFF73	Мессинский
+stages	Tortonian	11.63	7.246	Trt	#FFFF66	Тортонский
+stages	Serravallian	13.82	11.63	Srr	#FFFF59	Серравальский
+stages	Langhian	15.98	13.82	Ln	#FFFF4D	Лангский
+stages	Burdigalian	20.45	15.98	Brd	#FFFF41	Бурдигальский
+stages	Aquitanian	23.04	20.45	Aq	#FFFF33	Аквитанский
+stages	Chattian	27.3	23.04	Cht	#FEE6AA	Хаттский
+stages	Rupelian	33.9	27.3	Rp	#FED99A	Рюпельский
+stages	Priabonian	37.71	33.9	Prb	#FDCDA1	Приабонский
+stages	Bartonian	41.03	37.71	Brt	#FDC091	Бартонский
+stages	Lutetian	48.07	41.03	Lt	#FCB482	Лютетский
+stages	Ypresian	56.0	48.07	Y	#FCA773	Ипрский
+stages	Thanetian	59.24	56.0	Th	#FDBF6F	Танетский
+stages	Selandian	61.66	59.24	Sl	#FEBF65	Зеландский
+stages	Danian	66.0	61.66	Dn	#FDB462	Датский
+stages	Maastrichtian	72.2	66.0	Mst	#F2FA8C	Маастрихтский
+stages	Campanian	83.6	72.2	Cm	#E6F47F	Кампанский
+stages	Santonian	85.7	83.6	Snt	#D9EF74	Сантонский
+stages	Coniacian	89.8	85.7	Cnc	#CCE968	Коньякский
+stages	Turonian	93.9	89.8	Trnn	#BFE35D	Туронский
+stages	Cenomanian	100.5	93.9	Cnm	#B3DE53	Сеноманский
+stages	Albian	113.2	100.5	Alb	#CCEA97	Альбский
+stages	Aptian	121.4	113.2	Ap	#BFE48A	Аптский
+stages	Barremian	125.77	121.4	Brrm	#B3DF7F	Барремский
+stages	Hauterivian	132.6	125.77	Htr	#A6D975	Готеривский
+stages	Valanginian	137.05	132.6	Vl	#99D36A	Валанжинский
+stages	Berriasian	143.1	137.05	Brrs	#8CCD60	Берриасский
+stages	Tithonian	149.2	143.1	Tt	#D9F1F7	Титонский
+stages	Kimmeridgian	154.8	149.2	Km	#CCECF4	Кимериджский
+stages	Oxfordian	161.5	154.8	Ox	#BFE7F1	Оксфордский
+stages	Callovian	165.3	161.5	Cll	#BFE7E5	Келловейский
+stages	Bathonian	168.2	165.3	Bt	#B3E2E3	Батский
+stages	Bajocian	170.9	168.2	Bj	#A6DDE0	Байосский
+stages	Aalenian	174.7	170.9	Aln	#9AD9DD	Ааленский
+stages	Toarcian	184.2	174.7	Trc	#99CEE3	Тоарский
+stages	Pliensbachian	192.9	184.2	Pl	#80C5DD	Плинсбахский
+stages	Sinemurian	199.5	192.9	Snm	#67BCD8	Синемюрский
+stages	Hettangian	201.4	199.5	Htt	#4EB3D3	Геттангский
+stages	Rhaetian	205.7	201.4	Rht	#E3B9DB	Рэтский
+stages	Norian	227.3	205.7	Nrn	#D6AAD3	Норийский
+stages	Carnian	237.0	227.3	Cr	#C99BCB	Карнийский
+stages	Ladinian	241.464	237.0	Ldn	#C983BF	Ладинский
+stages	Anisian	246.7	241.464	An	#BC75B7	Анизийский
+stages	Olenekian	249.9	246.7	Ol	#B051A5	Оленёкский
+stages	Induan	251.902	249.9	I	#A4469F	Индский
+stages	Changhsingian	254.14	251.902	Chn	#FCC0B2	Чансинский
+stages	Wuchiapingian	259.51	254.14	Wc	#FCB4A2	Вучапинский
+stages	Capitanian	264.28	259.51	Cp	#FB9A85	Кептенский
+stages	Wordian	266.9	264.28	Wr	#FB8D76	Вордский
+stages	Roadian	274.4	266.9	Rd	#FB8069	Роудский
+stages	Kungurian	283.3	274.4	Kn	#E38776	Кунгурский
+stages	Artinskian	290.1	283.3	Art	#E37B68	Артинский
+stages	Sakmarian	293.52	290.1	Sk	#E36F5C	Сакмарский
+stages	Asselian	298.9	293.52	As	#E36350	Ассельский
+stages	Gzhelian	303.7	298.9	Gzhl	#CCD4C7	Гжельский
+stages	Kasimovian	307.0	303.7	Ks	#BFD0C5	Касимовский
+stages	Moscovian	315.2	307.0	Msc	#C7CBB9	Московский
+stages	Bashkirian	323.4	315.2	Bs	#99C2B5	Башкирский
+stages	Serpukhovian	330.3	323.4	Srp	#BFC26B	Серпуховский
+stages	Visean	346.7	330.3	Vs	#A6B96C	Визейский
+stages	Tournaisian	358.86	346.7	Trns	#8CB06C	Турнейский
+stages	Famennian	372.15	358.86	Fm	#F2EDC5	Фаменский
+stages	Frasnian	382.31	372.15	Frs	#F2EDAD	Франский
+stages	Givetian	387.95	382.31	Gv	#F1E185	Живетский
+stages	Eifelian	393.47	387.95	Ef	#F1D576	Эйфельский
+stages	Emsian	410.62	393.47	Em	#E5D075	Эмсский
+stages	Pragian	413.02	410.62	Prg	#E5C468	Пражский
+stages	Lochkovian	419.62	413.02	Lc	#E5B75A	Лохковский
+stages	Pridoli	422.7	419.62	Prd	#E6F5E1	Пржидоли
+stages	Ludfordian	425.0	422.7	Ldf	#D9F0DF	Лудфордский
+stages	Gorstian	426.7	425.0	Grs	#CCECDD	Горстийский
+stages	Homerian	430.6	426.7	Hm	#CCEBD1	Гомерский
+stages	Sheinwoodian	432.9	430.6	Sh	#BFE6C3	Шейнвудский
+stages	Telychian	438.6	432.9	Tl	#BFE6CF	Теличский
+stages	Aeronian	440.5	438.6	Arn	#B3E1C2	Аэронский
+stages	Rhuddanian	443.1	440.5	Rhd	#A6DCB5	Рудданский
+stages	Hirnantian	445.2	443.1	Hr	#A6DBAB	Хирнантский
+stages	Katian	452.8	445.2	Kt	#99D69F	Катийский
+stages	Sandbian	458.2	452.8	Snd	#8CD094	Сандбийский
+stages	Darriwilian	469.4	458.2	Drr	#74C69C	Дарривильский
+stages	Dapingian	471.3	469.4	Dp	#66C092	Дапинский
+stages	Floian	477.1	471.3	Fl	#41B087	Флоский
+stages	Tremadocian	486.85	477.1	Trm	#33A97E	Тремадокский
+stages	Stage 10	491.0	486.85	S10	#E6F5C9	Ярус 10
+stages	Jiangshanian	494.2	491.0	J	#D9F0BB	Цзяншаньский
+stages	Paibian	497.0	494.2	Pb	#CCEBAE	Паибский
+stages	Guzhangian	500.5	497.0	Gzhn	#CCDFAA	Гужангский
+stages	Drumian	504.5	500.5	Drm	#BFD99D	Друмский
+stages	Wuliuan	506.5	504.5	Wl	#B3D492	Вулюаньский
+stages	Stage 4	514.5	506.5	S4	#B3CA8E	Ярус 4
+stages	Stage 3	521.0	514.5	S3	#A6C583	Ярус 3
+stages	Stage 2	529.0	521.0	S2	#A6BA80	Ярус 2
+stages	Fortunian	538.8	529.0	Frt	#99B575	Фортунский

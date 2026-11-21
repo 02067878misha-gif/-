@@ -15,6 +15,7 @@ internal static class Program
     private static void Main(string[] args)
     {
         Registration.Check();
+        Functional.Run(args[0]);
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
         var folder = Directory.CreateDirectory(args[0]);
         foreach (Rock rock in Enum.GetValues<Rock>())

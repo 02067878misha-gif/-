@@ -4,10 +4,12 @@
     <AssemblyName>StrataDraw</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Microsoft.CSharp" />
-    <Compile Include="../Drawing/Swatch.cs" Link="Swatch.cs" />
+    <Compile Include="../Drawing/*.cs" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../src/Drawing/Swatch.cs" Link="Swatch.cs" />
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
+    <Compile Include="../src/Drawing/*.cs" />
   </ItemGroup>
 </Project>
