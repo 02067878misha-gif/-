@@ -61,7 +61,7 @@ internal static class Functional
         Directory.CreateDirectory(output); section.Save(Path.Combine(output, "section.svg")); chart.Save(Path.Combine(output, "las.svg"));
         int n = 0;
         using var prev = ZipFile.OpenRead("data/previews.zip");
-        foreach (string file in new[] { "data/fgdc.zip", "data/symbols.zip", "data/basic.zip" })
+        foreach (string file in new[] { "data/fgdc.zip", "data/symbols.zip", "data/basic.zip", "data/sdar.zip" })
         {
             using var z = ZipFile.OpenRead(file);
             foreach (var e in z.Entries)
@@ -70,7 +70,14 @@ internal static class Functional
                 Check(XElement.Load(input).Name == ns + "svg" && prev.GetEntry(e.FullName + ".png") != null, "Vector " + e.FullName); n++;
             }
         }
-        Check(n == 1197 && Library.Tiles("data").Count == 481 && Library.Symbols("data").Count == 716, "Catalogs");
+        var rocks = Library.RockPatterns("data");
+        Check(rocks.Count == 19 && rocks.Select(r => r.Key).Distinct().Count() == rocks.Count, "SDAR catalog");
+        foreach (var rock in rocks)
+        {
+            Check(rock.NativeWidth > 0 && rock.Name.Contains(" / "), rock.Name);
+            Library.WithFile(rock, path => Check(XElement.Load(path).Name == ns + "svg", rock.Key));
+        }
+        Check(n == 1216 && Library.Tiles("data").Count == 500 && Library.Symbols("data").Count == 716, "Catalogs");
         var lineCatalog = File.ReadAllLines("data/lines.tsv");
         Check(lineCatalog.Length == 43, "FGDC line catalog");
         foreach (string row in lineCatalog)
@@ -83,6 +90,6 @@ internal static class Functional
         }
         var ages = Library.Ages("data");
         Check(ages.Count == 171 && ages.Any(x => x.Name.Contains("Юра") && x.Color == "#34B2C9"), "Timescale");
-        Console.WriteLine("Passed geological geometry, 52 line/mark combinations, LAS, horizons, 1197 vectors with previews and 171 ages.");
+        Console.WriteLine("Passed geological geometry, 52 line/mark combinations, LAS, horizons, 1216 vectors with previews and 171 ages.");
     }
 }

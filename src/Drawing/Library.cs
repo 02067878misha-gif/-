@@ -18,13 +18,19 @@ namespace StrataDraw
     {
         public static List<Entry> Tiles(string root) => File.ReadLines(Path.Combine(root, "tiles.tsv"))
             .Select(l => l.Split('\t')).Select(v => new Entry { Name = "FGDC " + v[0] + " " + v[1], Key = v[0] + ".svg", NativeWidth = double.Parse(v[2], CultureInfo.InvariantCulture), Location = Path.Combine(root, "fgdc.zip") })
-            .Concat(File.ReadLines(Path.Combine(root, "basic.tsv")).Select(l => l.Split('\t')).Select(v => new Entry
+            .Concat(NamedTiles(root, "basic", "Базовый профиль 2013 · "))
+            .Concat(RockPatterns(root)).ToList();
+
+        public static List<Entry> RockPatterns(string root) => NamedTiles(root, "sdar", "").ToList();
+
+        private static IEnumerable<Entry> NamedTiles(string root, string catalog, string prefix) =>
+            File.ReadLines(Path.Combine(root, catalog + ".tsv")).Select(l => l.Split('\t')).Select(v => new Entry
             {
-                Name = "Базовый профиль 2013 · " + v[1],
+                Name = prefix + v[1],
                 Key = v[0],
                 NativeWidth = double.Parse(v[2], CultureInfo.InvariantCulture),
-                Location = Path.Combine(root, "basic.zip")
-            })).ToList();
+                Location = Path.Combine(root, catalog + ".zip")
+            });
         public static List<Entry> Symbols(string root)
         {
             string file = Path.Combine(root, "symbols.zip");

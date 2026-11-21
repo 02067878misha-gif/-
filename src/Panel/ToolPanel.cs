@@ -30,7 +30,7 @@ namespace StrataDraw
         private ListBox list;
         private readonly Dictionary<string, List<Entry>> additions = new Dictionary<string, List<Entry>>();
         private XElement preferences = new XElement("settings");
-        private static readonly string[] Pages = { "Прослои", "Векторный узор", "Возраст", "Линия", "Знак", "Горизонты", "Каротаж LAS", "Легенда" };
+        private static readonly string[] Pages = { "Прослои", "Крапы пород", "Векторный узор", "Возраст", "Линия", "Знак", "Горизонты", "Каротаж LAS", "Легенда" };
         public ToolPanel(object application)
         {
             this.application = application;
@@ -132,7 +132,8 @@ namespace StrataDraw
             switch (page)
             {
                 case "Прослои": BedPage(); break;
-                case "Векторный узор": TilePage(); break;
+                case "Крапы пород": TilePage(true); break;
+                case "Векторный узор": TilePage(false); break;
                 case "Возраст": AgePage(); break;
                 case "Линия": LinePage(); break;
                 case "Знак": SymbolPage(); break;

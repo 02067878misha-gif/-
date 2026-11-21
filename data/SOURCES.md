@@ -7,3 +7,5 @@
 * Десять SVG базового профиля штриховок построены по описаниям слоёв в gost-21-302-2013-basic.toml из strat-column-builder, версия 0.0.1. Название стандарта относится к профилю автора. Проверка соответствия официальному изданию отдельно не проводилась. MIT, Gabzetdinov Ruslan, 2025. https://github.com/crispuscrew/strat-column-builder/tree/2ddba03a5a558222ae3797f4c22db422046a6e85
 
 * 43 однокомпонентных стиля линий FGDC перенесены из библиотеки gsymblib (Alessandro Frigeri и соавторы). В lines.tsv указаны название, цвет, толщина и ритм штриха. Условия GPL-3 приведены в GPL-3.txt. https://github.com/afrigeri/geologic-symbols-qgis
+
+* Для 19 крапов использованы обозначения из R/patterns.R пакета SDAR 0.9-55 (John R. Ortiz, Carlos Jaramillo, при участии Carlos Moreno). Для Strata Draw рисунки адаптированы к повторяющейся плитке 12 × 6 мм, добавлены русские названия и миниатюры. SVG в sdar.zip, их миниатюры и генератор scripts/build-sdar.py распространяются по GPL-2.0-or-later. Текст выбранной для поставки версии GPL 3 включён в GPL-3.txt. [Исходные обозначения и лицензия пакета](https://github.com/cran/SDAR/tree/65530c9145e6829bbe021cd5bca296f680ad2c1b).

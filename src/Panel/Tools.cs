@@ -73,15 +73,16 @@ namespace StrataDraw
             dynamic result = session.Strokes(lines, Value("color"), Num("width", .01, 10)); result.Name = "Strata Draw · " + Value("rock"); session.Tag((object)result, "Прослои", Value("rock"));
         }
 
-        private void TilePage()
+        private void TilePage(bool rocks)
         {
             Action<DrawingSession> apply = session =>
             {
                 var area = session.Area(); var entry = Selected();
                 double width = Num("size", 0, 1000);
-                Library.WithFile(entry, path => { dynamic result = session.Vector(area, path, width == 0 ? entry.NativeWidth : width, Num("angle", -360, 360)); session.Tag((object)result, "Векторные узоры", entry.Name); });
+                Library.WithFile(entry, path => { dynamic result = session.Vector(area, path, width == 0 ? entry.NativeWidth : width, Num("angle", -360, 360)); session.Tag((object)result, rocks ? "Крапы пород" : "Векторные узоры", entry.Name); });
             };
-            Catalog(Library.Tiles(data).Concat(Extras()).ToList(), () => Edit(false, apply));
+            var tiles = rocks ? Library.RockPatterns(data) : Library.Tiles(data);
+            Catalog(tiles.Concat(Extras()).ToList(), () => Edit(false, apply));
             Input("size", "Ширина плитки, мм (0 — размер каталога)", "0"); Input("angle", "Поворот, °", "0");
             ActionButtons(apply); Button(form, "Добавить свои плитки…", () => AddCatalogFile(false));
         }

@@ -30,6 +30,13 @@ namespace StrataDraw
                 var area = s.Area();
                 Library.WithFile(Library.Tiles(data).First(t => t.Key == "627.svg"), path => s.Vector(area, path, 8, 10));
             });
+            frame.CreateSelection();
+            DrawingSession.Run(application, false, "Strata Draw - check", s =>
+            {
+                var tile = Library.RockPatterns(data).First();
+                var area = s.Area();
+                Library.WithFile(tile, path => s.Vector(area, path, tile.NativeWidth, 0));
+            });
             dynamic line = layer.CreateLineSegment(10, 60, 70, 70);
             line.CreateSelection();
             DrawingSession.Run(application, false, "Strata Draw - check", s => s.Decorate(new LineStyle { Form = LineForm.Wave, Marks = new[] { Mark.Triangle } }));

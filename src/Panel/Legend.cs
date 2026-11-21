@@ -59,7 +59,7 @@ namespace StrataDraw
                     y -= 5; last = section;
                 }
                 dynamic chip;
-                if (section == "Возраст" || (section == "Векторные узоры" && (int)source.Fill.Type != 0))
+                if (section == "Возраст" || ((section == "Векторные узоры" || section == "Крапы пород") && (int)source.Fill.Type != 0))
                 {
                     chip = Layer.CreateRectangle(x, y, x + width, y - height);
                     chip.Fill.CopyAssign(source.Fill); chip.Outline.Width = .15;
